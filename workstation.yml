@@ -1,0 +1,54 @@
+---
+- name: Setup Dylans Workstation
+  hosts: all
+  tasks:
+
+# are we better off running as dylanh then sudo-ing for privileged stuff? you need to run makepkg -s as a non priv user. (btw)
+    - name: Install konsole
+      package:
+        name: konsole
+        state: present
+      become: yes
+    - name: Install dolphin
+      package:
+        name: dolphin
+        state: present
+      become: yes
+    - name: Install git
+      package:
+        name: git
+        state: present
+      become: yes
+    - name: Install vim
+      package:
+        name: vim
+        state: present
+      become: yes
+    - name: Install kcalc
+      package:
+        name: kcalc
+        state: present
+      become: yes
+
+# fakeroot is needed for makepkg which is needed to install google-chrome.
+    - name: Install fakeroot
+      package:
+        name: fakeroot
+        state: present
+      become: yes
+
+# this just checks out the repo, you still need to cd to it and run makepkg -s
+    - name: clone google-chrome repo
+      git:
+        repo: https://aur.archlinux.org/google-chrome.git
+        dest: /usr/src/google-chrome
+        update: no
+      become: yes
+    - name: make google-chrome source code available to me
+      file: 
+        path: /usr/src/google-chrome
+        group: wheel
+        mode: '0775'
+      become: yes
+
+# TODO if its arch, use https://www.archlinux.org/mirrorlist/?country=US & https://www.archlinux.org/mirrorlist/?country=GB to randomly select some mirrors and create /etc/pacman.d/mirrorlist The reason for a mixture is because in some cases the mirrors dont have all the files needed for some packages (you saw this with dolphin)
