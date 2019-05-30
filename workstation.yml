@@ -29,6 +29,12 @@
         name: kcalc
         state: present
       become: yes
+    - name: Install syncthing
+      package:
+        name: syncthing
+        state: present
+      become: yes
+
 
 # fakeroot is needed for makepkg which is needed to install google-chrome.
     - name: Install fakeroot
