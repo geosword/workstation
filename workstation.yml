@@ -11,81 +11,56 @@
         shell: /bin/bash
         groups: wheel,dylanh
         home: /home/dylanh
-## install a bunch of stuff
-#    - name: install a bunch of stuff
-#      package:
-#        name: "{{ item }}"
-#        state: present
-#      with_items:
-#        - 
-
-    - name: Install nvidia-settings
+# install a bunch of stuff
+    - name: install a bunch of stuff
       package:
-        name: nvidia-settings
+        name: "{{ item }}"
         state: present
+      with_items:
+# basic stuff
+        - nvidia
+        - nvidia-settings
+        - nvidia-utils
+        - xorg
+        - xorg-xinit
+        - plasma
+        - sddm
+        - konsole
+        - dolphin
+        - git
+        - vim
+        - breeze-gtk
+        - kde-gtk-config
+# fakeroot is needed for makepkg which is needed to install google-chrome.
+        - fakeroot
+# extra things that arent required for a "functioning" system
+        - kcalc
+        - syncthing
+# THERES more STUFF TO DO FOR SETTING UP BLUETOOTH. check the archlinux bluetooth page for details
+        - bluez
+        - bluez-utils
 
-    - name: Install nvidia-utils
-      package:
-        name: nvidia-utils
-        state: present
  
-## install packages
-    - name: Install xorg
-      package:
-        name: xorg
-        state: present
-
-    - name: Install xorg-xinit
-      package:
-        name: xorg
-        state: present
-
-    - name: Install plasma
-      package:
-        name: plasma
-        state: present
-
-    - name: Install sddm
-      package:
-        name: sddm
-        state: present
-
-    - name: Install konsole
-      package:
-        name: konsole
-        state: present
-
-    - name: Install dolphin
-      package:
-        name: dolphin
-        state: present
-
-    - name: Install git
-      package:
-        name: git
-        state: present
-
-    - name: Install vim
-      package:
-        name: vim
-        state: present
-
-    - name: Install kcalc
-      package:
-        name: kcalc
-        state: present
-
-    - name: Install syncthing
-      package:
-        name: syncthing
-        state: present
-
-    - name: Install breeze-gtk
-      package:
-        name: breeze-gtk
-        state: present
-
 ## configuration
+    - name: get an xorg configuration using nvidia-xconfig
+      command: /usr/bin/nvidia-xconfig
+      args:
+        creates: /etc/X11/xorg.conf
+
+# this means we can use the nvidia-settings kde app to configure the displays, and save the configuration
+# in the app without it complaining about permissions.
+ 
+    - name: make the xorg configuration editable by uses in the wheel group (me)
+      file:
+        path: /etc/X11
+        group: wheel
+        mode: '0775'
+
+    - name: make the file created by nvidia-xconfig writable by wheel
+      file:
+        path: /etc/X11/xorg.conf
+        group: wheel
+        mode: '0775'
 
     - name: xinitrc
       copy:
@@ -109,12 +84,6 @@
           FacesDir=/usr/share/sddm/faces
           ThemeDir=/usr/share/sddm/themes
 
-# fakeroot is needed for makepkg which is needed to install google-chrome.
-    - name: Install fakeroot
-      package:
-        name: fakeroot
-        state: present
-
 # this just checks out the repo, you still need to cd to it and run makepkg -s
     - name: clone google-chrome repo
       git:
@@ -126,5 +95,9 @@
         path: /usr/src/google-chrome
         group: wheel
         mode: '0775'
+    - name: run makepkg in the google-chrome folder we just made
+      command: chdir=/usr/src/google-chrome makepkg -s --noconfirm
+      args:
+        creates: /usr/src/google-chrome/google-chrome-*.pkg.tar.xz
 
 # TODO if its arch, use https://www.archlinux.org/mirrorlist/?country=US & https://www.archlinux.org/mirrorlist/?country=GB to randomly select some mirrors and create /etc/pacman.d/mirrorlist The reason for a mixture is because in some cases the mirrors dont have all the files needed for some packages (you saw this with dolphin)
