@@ -8,6 +8,7 @@ alias findhost="~/tools/findhost.pl"
 alias fssh="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o BatchMode=yes -o ConnectTimeout=3 -o ConnectionAttempts=1"
 alias mount="sudo mount"
 alias umount="sudo umount"
+alias passook="pwgen -s"
 alias k="kubectl"
 alias tms="~/tools/tmuxsplit/tmuxsplit.sh"
 
