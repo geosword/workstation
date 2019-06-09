@@ -9,12 +9,14 @@
       get_url:
         url: "https://www.archlinux.org/mirrorlist/?country=US&country=GB&protocol=http&ip_version=4&use_mirror_status=on"
         dest: "/etc/pacman.d/mirrorlist"
+      become: yes
 
     - name: "uncomment `#Server` in pacman mirror list"
       replace:
         dest: "/etc/pacman.d/mirrorlist"
         regexp: '^#Server'
         replace: 'Server'
+      become: yes
 
     - name: "uncomment colors"
       lineinfile:
@@ -23,6 +25,8 @@
         regexp: "^Color"
         insertafter: "^#Color"
         line: "Color"
+      become: yes
+
 # install a bunch of stuff
     - name: install a bunch of stuff
       package:
@@ -40,6 +44,7 @@
         - nvidia-settings
         - nvidia-utils
         - plasma
+        - pwgen
         - rdesktop
         - sddm
         - vim
@@ -53,6 +58,7 @@
 # THERES more STUFF TO DO FOR SETTING UP BLUETOOTH. check the archlinux bluetooth page for details
         - bluez
         - bluez-utils
+      become: yes
 ## create my non privileged user
     - name: create user
       user:
@@ -61,6 +67,7 @@
 # lp group allows bluetooth access, wheel allows root access to things
         groups: wheel,dylanh,lp
         home: /home/dylanh
+      become: yes
 #
  
 ## configuration
@@ -68,6 +75,7 @@
       command: /usr/bin/nvidia-xconfig
       args:
         creates: /etc/X11/xorg.conf
+      become: yes
 
 # this means we can use the nvidia-settings kde app to configure the displays, and save the configuration
 # in the app without it complaining about permissions.
@@ -77,12 +85,14 @@
         path: /etc/X11
         group: wheel
         mode: '0775'
+      become: yes
 
     - name: make the file created by nvidia-xconfig writable by wheel
       file:
         path: /etc/X11/xorg.conf
         group: wheel
         mode: '0775'
+      become: yes
 
     - name: xinitrc
       copy:
@@ -93,6 +103,7 @@
     - name: create an sddm config drop in folder
       file: 
         path: /etc/sddm.conf.d/
+      become: yes
 
     - name: create the sddm theme drop in
       copy:
@@ -105,6 +116,7 @@
           EnableAvatars=true
           FacesDir=/usr/share/sddm/faces
           ThemeDir=/usr/share/sddm/themes
+      become: yes
 
 # this just checks out the repo, you still need to cd to it and run makepkg -s
     - name: clone google-chrome repo
@@ -112,33 +124,39 @@
         repo: https://aur.archlinux.org/google-chrome.git
         dest: /usr/src/google-chrome
         update: no
+      become: yes
     - name: make google-chrome source code available to me
       file: 
         path: /usr/src/google-chrome
         group: wheel
         mode: '0775'
+      become: yes
     - name: run makepkg in the google-chrome folder we just made
       command: chdir=/usr/src/google-chrome makepkg -s --noconfirm
       args:
         creates: /usr/src/google-chrome/google-chrome-*.pkg.tar.xz
+      become: yes
 # now to install it, provided it not installed.
     - name: now install the package we just makepkg'd. I hope we can install using wildcards.
       command: chdir=/usr/src/google-chrome pacman -U --noconfirm google_chrome-*.pkg.tar.xz
       args:
         creates: /usr/bin/google-chrome-stable
+      become: yes
 
 # bash configuration
     - name: install bash_profile
-      path: /home/dylanh/.bash_profile
-      mode: '0644'
-      content: |
-        if [ -f ~/.bashrc ]; then
-        	. ~/.bashrc
-        fi
+      copy:
+        dest: /home/dylanh/.bash_profile
+        mode: '0644'
+        content: |
+          if [ -f ~/.bashrc ]; then
+          	. ~/.bashrc
+          fi
 
     - name: install bashrc
-      path: /home/dylanh/.bashrc
-      src: files/bash/bashrc
-      owner: dylanh
-      mode: '0644'
+      copy:
+        dest: /home/dylanh/.bashrc
+        src: files/bash/bashrc
+        owner: dylanh
+        mode: '0644'
 
