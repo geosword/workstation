@@ -4,13 +4,25 @@
 - name: Setup Dylans Workstation
   hosts: all
   tasks:
-## create my non privileged user
-    - name: create user
-      user:
-        name: dylanh
-        shell: /bin/bash
-        groups: wheel,dylanh
-        home: /home/dylanh
+# update the mirrors list
+    - name: download pacman mirror list
+      get_url:
+        url: "https://www.archlinux.org/mirrorlist/?country=US&country=GB&protocol=http&ip_version=4&use_mirror_status=on"
+        dest: "/etc/pacman.d/mirrorlist"
+
+    - name: "uncomment `#Server` in pacman mirror list"
+      replace:
+        dest: "/etc/pacman.d/mirrorlist"
+        regexp: '^#Server'
+        replace: 'Server'
+
+    - name: "uncomment colors"
+      lineinfile:
+        dest: /etc/pacman.conf
+        state: "present"
+        regexp: "^Color"
+        insertafter: "^#Color"
+        line: "Color"
 # install a bunch of stuff
     - name: install a bunch of stuff
       package:
@@ -18,19 +30,21 @@
         state: present
       with_items:
 # basic stuff
+        - breeze-gtk
+        - dolphin
+        - git
+        - ipcalc
+        - konsole
+        - kde-gtk-config
         - nvidia
         - nvidia-settings
         - nvidia-utils
+        - plasma
+        - rdesktop
+        - sddm
+        - vim
         - xorg
         - xorg-xinit
-        - plasma
-        - sddm
-        - konsole
-        - dolphin
-        - git
-        - vim
-        - breeze-gtk
-        - kde-gtk-config
 # fakeroot is needed for makepkg which is needed to install google-chrome.
         - fakeroot
 # extra things that arent required for a "functioning" system
@@ -39,7 +53,15 @@
 # THERES more STUFF TO DO FOR SETTING UP BLUETOOTH. check the archlinux bluetooth page for details
         - bluez
         - bluez-utils
-
+## create my non privileged user
+    - name: create user
+      user:
+        name: dylanh
+        shell: /bin/bash
+# lp group allows bluetooth access, wheel allows root access to things
+        groups: wheel,dylanh,lp
+        home: /home/dylanh
+#
  
 ## configuration
     - name: get an xorg configuration using nvidia-xconfig
@@ -99,5 +121,24 @@
       command: chdir=/usr/src/google-chrome makepkg -s --noconfirm
       args:
         creates: /usr/src/google-chrome/google-chrome-*.pkg.tar.xz
+# now to install it, provided it not installed.
+    - name: now install the package we just makepkg'd. I hope we can install using wildcards.
+      command: chdir=/usr/src/google-chrome pacman -U --noconfirm google_chrome-*.pkg.tar.xz
+      args:
+        creates: /usr/bin/google-chrome-stable
 
-# TODO if its arch, use https://www.archlinux.org/mirrorlist/?country=US & https://www.archlinux.org/mirrorlist/?country=GB to randomly select some mirrors and create /etc/pacman.d/mirrorlist The reason for a mixture is because in some cases the mirrors dont have all the files needed for some packages (you saw this with dolphin)
+# bash configuration
+    - name: install bash_profile
+      path: /home/dylanh/.bash_profile
+      mode: '0644'
+      content: |
+        if [ -f ~/.bashrc ]; then
+        	. ~/.bashrc
+        fi
+
+    - name: install bashrc
+      path: /home/dylanh/.bashrc
+      src: files/bash/bashrc
+      owner: dylanh
+      mode: '0644'
+
