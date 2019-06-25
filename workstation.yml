@@ -181,6 +181,11 @@
         src: files/bash/bashrc
         owner: dylanh
         mode: '0644'
+    - name: install vim settings
+      file:
+        path: ~/.vim
+        owner: dylanh
+        mode: '0744'
 
 # we going to use systemd-resolved against my better judgement
     - name: replace /etc/resolv.conf with a link to system-resolved configuration
