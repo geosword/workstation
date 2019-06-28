@@ -19,4 +19,4 @@ export AWS_CONFIG_FILE=~/.aws/config
 
 # make tmux pretty
 export TERM=xterm-256color
-
+eval $(keychain --eval id_rsa id_rsa_dylans)

@@ -39,17 +39,20 @@
         - dhcpcd
         - git
         - ipcalc
+        - keychain
         - konsole
         - kde-gtk-config
         - nvidia
         - nvidia-settings
         - nvidia-utils
+        - pavucontrol
         - plasma
         - pwgen
         - rdesktop
         - riot-desktop
         - sddm
         - sudo
+        - tmux
         - vim
         - xorg
         - xorg-xinit
@@ -162,8 +165,11 @@
         block: |
           [sublime-text]
           Server = https://download.sublimetext.com/arch/dev/x86_64
+
     - name: now install. We'll use command cause we need special pacman flags (-uy) This could take a while, check /var/log/pacman.log for progress
-      command: pacman -Syu --noconfirm sublime-text
+      command: pacman -Syu --noconfirm sublme-text
+      args:
+        creates: /opt/sublime_text/sublime_text
 
 # bash configuration
     - name: install bash_profile
@@ -181,11 +187,6 @@
         src: files/bash/bashrc
         owner: dylanh
         mode: '0644'
-    - name: install vim settings
-      file:
-        path: ~/.vim
-        owner: dylanh
-        mode: '0744'
 
 # we going to use systemd-resolved against my better judgement
     - name: replace /etc/resolv.conf with a link to system-resolved configuration
