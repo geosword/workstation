@@ -31,6 +31,7 @@
         state: present
       with_items:
 # basic stuff
+        - base-devel
         - breeze-gtk
         - bind-tools
         - dolphin
@@ -40,6 +41,8 @@
         - git
         - ipcalc
         - keychain
+        - keychain
+        - keepassxc
         - konsole
         - kde-gtk-config
         - nvidia
@@ -52,8 +55,11 @@
         - riot-desktop
         - sddm
         - sudo
+        - syncthing
         - tmux
         - vim
+        - wmctrl
+        - xdotool
         - xorg
         - xorg-xinit
 # fakeroot is needed for makepkg which is needed to install google-chrome.
@@ -64,12 +70,22 @@
 # THERES more STUFF TO DO FOR SETTING UP BLUETOOTH. check the archlinux bluetooth page for details
         - bluez
         - bluez-utils
+      tags: packages
+
 # Allow members of wheel to privilege escalate without a password
     - name: allow wheel passwordless sudo privs.
       replace:
         dest: "/etc/sudoers"
         regexp: "^# %wheel ALL=\\(ALL\\) NOPASSWD"
         replace: "%wheel ALL=(ALL) NOPASSWD"
+
+## create the group for the non privileged user
+    - name: create group
+      group:
+        name: dylanh
+      tags:
+        - createuser
+
 ## create my non privileged user
     - name: create user
       user:
@@ -78,6 +94,18 @@
 # lp group allows bluetooth access, wheel allows root access to things
         groups: wheel,dylanh,lp
         home: /home/dylanh
+      tags:
+        - createuser
+
+    - name: create the .ssh folder
+      file:
+        path: /home/dylanh/.ssh
+        mode: '0700'
+        state: directory
+        owner: dylanh
+        group: dylanh
+      tags:
+        - createuser
 #
  
 ## configuration
@@ -112,6 +140,8 @@
     - name: create an sddm config drop in folder
       file: 
         path: /etc/sddm.conf.d/
+        state: directory
+        mode: '0755'
 
     - name: create the sddm theme drop in
       copy:
@@ -140,11 +170,15 @@
       command: chdir=/usr/src/google-chrome makepkg -s --noconfirm
       args:
         creates: /usr/src/google-chrome/google-chrome-*.pkg.tar.xz
+      become: true
+      become_user: dylanh
+
 # now to install it, provided it not installed.
     - name: now install the package we just makepkg'd. I hope we can install using wildcards.
-      command: chdir=/usr/src/google-chrome pacman -U --noconfirm google_chrome-*.pkg.tar.xz
+      command: chdir=/usr/src/google-chrome pacman -U --noconfirm google-chrome-*.pkg.tar.xz
       args:
         creates: /usr/bin/google-chrome-stable
+
 # Install sublime text
     - name: fetch sublime repo key for arch
       get_url: 
@@ -167,7 +201,7 @@
           Server = https://download.sublimetext.com/arch/dev/x86_64
 
     - name: now install. We'll use command cause we need special pacman flags (-uy) This could take a while, check /var/log/pacman.log for progress
-      command: pacman -Syu --noconfirm sublme-text
+      command: pacman -Syu --noconfirm sublime-text
       args:
         creates: /opt/sublime_text/sublime_text
 
@@ -196,3 +230,14 @@
         state: link
         force: yes
 
+# Some usefull directories NOT WORKING
+#    - name: create some helpfull folders
+#      file:
+#        path: "{{item}}"
+#        state: directory
+#        mode: "0755"
+#        group: "dylanh"
+#        user: "dylanh"
+#      with_items:
+#       - "development"
+#      tags: userdirs
