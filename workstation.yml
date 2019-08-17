@@ -1,8 +1,20 @@
 ---
 # this MUST be run as root, so that it can create the non priviledged user.
+- hosts: all
+  gather_facts: false
+  tasks:
+    - name: "check for python"
+      raw: test -e /usr/bin/python2
+      changed_when: false
+      ignore_errors: true
+      register: pythoninstalled
 
-- name: Setup Dylans Workstation
-  hosts: all
+    - name: install python if its not there.
+      raw: pacman -S --noconfirm python2
+      when:
+        - pythoninstalled.rc != 0
+
+- hosts: all
   tasks:
 # update the mirrors list
     - name: download pacman mirror list
@@ -39,12 +51,14 @@
         - evolution-ews
         - dhcpcd
         - git
+        - hwinfo
         - ipcalc
         - keychain
         - keychain
         - keepassxc
         - konsole
         - kde-gtk-config
+        - net-tools
         - nvidia
         - nvidia-settings
         - nvidia-utils
@@ -161,11 +175,13 @@
         repo: https://aur.archlinux.org/google-chrome.git
         dest: /usr/src/google-chrome
         update: no
+
     - name: make google-chrome source code available to me
       file: 
         path: /usr/src/google-chrome
         group: wheel
         mode: '0775'
+
     - name: run makepkg in the google-chrome folder we just made
       command: chdir=/usr/src/google-chrome makepkg -s --noconfirm
       args:
@@ -173,11 +189,27 @@
       become: true
       become_user: dylanh
 
+# This pattern could be a bit loose
+    - name: get a list of pkg.tar.xz files to install
+      find:
+        paths: /usr/src/google-chrome/
+        patterns: '*.pkg.tar.xz'
+      register: chromepackage
+
 # now to install it, provided it not installed.
+    - name: debug
+      debug:
+        msg: "file to install is {{ chromepackage.files }}"
+
     - name: now install the package we just makepkg'd. I hope we can install using wildcards.
-      command: chdir=/usr/src/google-chrome pacman -U --noconfirm google-chrome-*.pkg.tar.xz
+      command: chdir=/usr/src/google-chrome pacman -U --noconfirm {{ item.path | basename }}
+      with_items: "{{ chromepackage.files }}"
+      failed_when: chromepackage.matched == 0
       args:
         creates: /usr/bin/google-chrome-stable
+      when:
+        - chromepackage.matched > 0
+
 
 # Install sublime text
     - name: fetch sublime repo key for arch
@@ -230,14 +262,40 @@
         state: link
         force: yes
 
-# Some usefull directories NOT WORKING
-#    - name: create some helpfull folders
-#      file:
-#        path: "{{item}}"
-#        state: directory
-#        mode: "0755"
-#        group: "dylanh"
-#        user: "dylanh"
-#      with_items:
-#       - "development"
-#      tags: userdirs
+    - name: set the keyboard layout to UK
+      copy:
+        dest: /etc/vconsole.conf
+        content: 'KEYMAP=uk'
+
+    - name: set the timezone
+      timezone:
+        name: Europe/London
+
+    - name: set the locale
+      locale_gen:
+        name: en_GB.UTF-8
+        state: present
+
+    - name: create some helpful folders
+      file:
+        path: "/home/dylanh/{{ item }}"
+        state: directory
+        mode: "0755"
+        group: "dylanh"
+        owner: "dylanh"
+      become: true
+      become_user: dylanh
+      with_items: ["development"]
+      tags:
+        - createfolders
+
+# Some stuff for when we are testing with vagrant
+   - name: Include virtualbox operations if we are in virtualbox
+     include: virtualbox.yaml
+     when: 
+        - ansible_virtualization_type == 'virtualbox'
+
+# For setting KDE shortcut keys and custom shortcuts, copy the following files: (~/.config)
+# kglobalshortcutsrc - global shortcuts
+# khotkeysrc - custom shortcuts
+# plasma-org.kde.plasma.desktop-appletsrc - If you have hidden system tray applets. This may not exist until you actually try to override some of them
