@@ -290,9 +290,9 @@
         - createfolders
 
 # Some stuff for when we are testing with vagrant
-   - name: Include virtualbox operations if we are in virtualbox
-     include: virtualbox.yaml
-     when: 
+    - name: Include virtualbox operations if we are in virtualbox
+      include: virtualbox.yaml
+      when: 
         - ansible_virtualization_type == 'virtualbox'
 
 # For setting KDE shortcut keys and custom shortcuts, copy the following files: (~/.config)
