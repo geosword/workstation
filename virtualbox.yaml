@@ -3,33 +3,34 @@
         name: virtualbox-guest-utils-nox
         state: absent
       register: removenox
-      when: 
-        - ansible_virtualization_type == 'virtualbox'
 
     - name: install virtuabox-guest-utils  (Virtualbox only)
       package:
         name: virtualbox-guest-utils
         state: present
-      when: 
-        - ansible_virtualization_type == 'virtualbox'
 
     - name: reboot if we had to remove guest-utils-nox and wait for it to come backup  (Virtualbox only)
       reboot:
       when:
         - removenox.changed
-        - ansible_virtualization_type == 'virtualbox'
 
     - name: modprobe the vboxvideo drivers (Virtualbox only)
       modprobe:
         name: vboxvideo
-      when: 
-        - ansible_virtualization_type == 'virtualbox'
 
     - name: Set the X11 config file to something simple and default  (Virtualbox only)
-      shell: "/usr/bin/Xorg :0 -configure && cp /root/xorg.conf.new /etc/X11/xorg.conf"
+      shell: "/usr/bin/Xorg :0 -configure"
       args:
         creates: /etc/X11/xorg.conf
-      when: 
-        - ansible_virtualization_type == 'virtualbox'
 
+    - name: Set the X11 config file to something simple and default  (Virtualbox only)
+      shell: "/usr/bin/Xorg :0 -configure"
+      args:
+        creates: /root/xorg.conf.new
+
+    - name: copy the vanilla xorg.conf to the right place
+      copy:
+        src: /root/xorg.conf.new
+        dest: /etc/X11/xorg.conf
+        remote_src: true
 

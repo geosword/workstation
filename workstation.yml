@@ -1,5 +1,7 @@
 ---
 # this MUST be run as root, so that it can create the non priviledged user.
+# VARS - take network config so we can specify things like search domain.
+
 - hosts: all
   gather_facts: false
   tasks:
@@ -46,13 +48,19 @@
         - base-devel
         - breeze-gtk
         - bind-tools
+# THERES more STUFF TO DO FOR SETTING UP BLUETOOTH. check the archlinux bluetooth page for details
+        - bluez
+        - bluez-utils
         - dolphin
-        - evolution
-        - evolution-ews
-        - dhcpcd
+        - efibootmgr
+# fakeroot is needed for makepkg which is needed to install google-chrome.
+        - fakeroot
+        - firefox
         - git
+        - grub
         - hwinfo
         - ipcalc
+        - kcalc
         - keychain
         - keychain
         - keepassxc
@@ -66,7 +74,9 @@
         - plasma
         - pwgen
         - rdesktop
+        - rdiff-backup
         - riot-desktop
+        - rsync
         - sddm
         - sudo
         - syncthing
@@ -76,14 +86,6 @@
         - xdotool
         - xorg
         - xorg-xinit
-# fakeroot is needed for makepkg which is needed to install google-chrome.
-        - fakeroot
-# extra things that arent required for a "functioning" system
-        - kcalc
-        - syncthing
-# THERES more STUFF TO DO FOR SETTING UP BLUETOOTH. check the archlinux bluetooth page for details
-        - bluez
-        - bluez-utils
       tags: packages
 
 # Allow members of wheel to privilege escalate without a password
@@ -276,6 +278,14 @@
         name: en_GB.UTF-8
         state: present
 
+    - name: make sure vfat and others are loaded at boot to prevent problems updating the kernel
+      copy:
+        dest: /etc/modules-load.d/vfat.conf
+        content: |
+          vfat
+          nls_cp437
+          nls_iso8859-1
+
     - name: create some helpful folders
       file:
         path: "/home/dylanh/{{ item }}"
@@ -285,7 +295,7 @@
         owner: "dylanh"
       become: true
       become_user: dylanh
-      with_items: ["development"]
+      with_items: ["development",".config"]
       tags:
         - createfolders
 
@@ -295,7 +305,26 @@
       when: 
         - ansible_virtualization_type == 'virtualbox'
 
-# For setting KDE shortcut keys and custom shortcuts, copy the following files: (~/.config)
-# kglobalshortcutsrc - global shortcuts
-# khotkeysrc - custom shortcuts
-# plasma-org.kde.plasma.desktop-appletsrc - If you have hidden system tray applets. This may not exist until you actually try to override some of them
+# Avoid "xf86EnableIOPorts: failed to set IOPL for I/O (Operation not permitted)"  when using startx as user
+    - name: Add the sticky bit to /usr/bin/xinit
+      file:
+        dest: /usr/bin/xinit
+        mode: u+s
+      tags:
+        - stickybit
+
+
+# Network config - make sure the correct dns servers and search domains are set (systemd)
+# /etc/systemd/network/10-eth0.link
+# /etc/systemd/network/20-wired.network
+
+    - name: copy in the kde config
+      synchronize:
+        src: ./files/plasma/
+        dest: /home/dylanh/.config/
+
+    - name: fix the permissions
+      file:
+        path: /home/dylanh/.config
+        owner: dylanh
+        group: dylanh
