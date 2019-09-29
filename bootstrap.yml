@@ -1,0 +1,144 @@
+- hosts: all
+  vars_prompt:
+    - name: "primaryDisk"
+      prompt: "Enter the name of the drive to repartition e.g. /dev/sda MAKE SURE YOU GET THIS RIGHT!!!"
+      private: no
+    - name: "imageName"
+      promtp: "Enter the name of the image to use for the root partition e.g. arch_092019v1.1.tar.gz"
+      private: no
+
+  tasks:
+    - name: check its a system rescue cd, if not, fail
+      shell: "/sbin/uname -a | grep sysresccd"
+
+  #    - name: Wait for confirmation
+  #      pause:
+  #        prompt: "WARNING!!!! Im about to remove all paritions from {{ primaryDisk }} and repartition. Press a key if you are SURE this is correct"
+  #     
+
+    - name: check the efi vars exist, because none of this will work if we're not on an efi enabled system
+      stat: path=/sys/firmware/efi/efivars
+      register: efivars
+
+    - name: This will fail if the efivars are not available. Did you boot with efi using an efi enabled system (you have to set this specifically in virtualbox)
+      fail: 
+        msg: Did you boot with efi using an efi enabled system (you have to set this specifically in virtualbox)
+      when: not efivars.stat.exists
+
+    - name: unmount the root partition (just incase there have been previous runs)
+      mount:
+        path: "/mnt/{{ item }}"
+        state: unmounted
+      with_items:
+        - dev
+        - proc
+        - sys
+        - efi
+        - 
+
+
+    - name: read the partitions on the disk
+      parted: "device={{ primaryDisk }} unit=MiB"
+      register: disk_info
+
+    - name: remove all partitions
+      parted:
+        device: "{{ primaryDisk }}"
+        number: '{{ item.num }}'
+        state: absent
+      loop: '{{ disk_info.partitions }}'
+
+# IN AN IDEAL WORLD - we'd be able to use parted to create the partitions as well
+# However in its current guise (sept 2019) it REQUIRES us to have knowledge of the disks
+# geometry. E.g. we can create the first partition, but then we need to know how big the disk
+# is and where the partition boundaries are.
+# In the mean time Im opting for a shell. See below
+# flags boot sets the partition type to EF00 (EFI)
+#    - name: create the EFI partition
+#      parted:
+#        device: "{{ primaryDisk }}"
+#        number: 1
+#        part_type: primary
+#        flags: boot
+#        state: present
+#        part_end: 250MiB
+#        label: gpt
+#
+#    - name: create the root partition
+#      parted:
+#        device: "{{ primaryDisk }}"
+#        number: 2
+#        part_start: 251MB
+#        part_end: 8590MB
+#        state: present
+#        label: gpt
+
+    # What does this eye burner do? It pipes into gdisk the exact key strokes you need
+    # to create 1 250MB EFI partition and use the rest as a root partition, without having
+    # to know how big the disk is, or account for any kind of partition alignment
+    # Yes its a nightmare, but it does the job until the parted module gets better
+    - name: create disk partitions
+      shell: "printf \"n\n\n\n+250M\nef00\nn\n\n\n\n\nw\ny\n\" | gdisk {{ primaryDisk }}"
+
+    - name: format the EFI partition
+      filesystem:
+        fstype: vfat
+        dev: "{{ primaryDisk }}1"
+
+    - name: format the root partition
+      filesystem:
+        fstype: ext4
+        dev: "{{ primaryDisk }}2"
+
+    # mount will ensure the mount point exists
+    # interestingly the mount module does not seem to account for mounting a partition WITHOUT adding it to fstab
+    # presumably in this case (if you were bothered about fstab being polluted, you would have to unmount afterwards)
+    # for us this isnt an issue because its a live operating system (system rescue cd)
+    - name: mount the root partition
+      mount:
+        path: /mnt
+        src: "{{ primaryDisk }}2"
+        fstype: ext4
+        state: mounted
+
+    # because of the limited space available on a live image, we are going to need to copy the archive to the root parition first, and then 
+    # extract it using remote_src.
+    # The only way around this and STILL JUST using unarchive is to edit ansible.cfg, which is a PITA, AND the temporary folder will NOT be accessible until
+    # after we've formatted it and mounted it, so probably NOT an option anyway
+
+    # The copy module does the same, even with unsafe_writes on. So we've going to have to resort to a command module
+
+    - name: copy the archive to the root partition (not extracting)
+      command: "scp files/{{ imageName }} {{ inventory_hostname }}:/mnt/"
+      delegate_to: localhost
+
+    - name: extract the root image.
+      unarchive:
+        src: "/mnt/{{ imageName }}"
+        dest: "/mnt"
+        remote_src: yes
+
+    - name: now mount the efi partition
+      mount:
+        path: /mnt/efi
+        src: "{{ primaryDisk }}1"
+        fstype: vfat
+        state: mounted
+
+    - name: get rid of the root image
+      file:
+        path: "/mnt/{{ imageName }}"
+        state: absent
+
+  # now we need to chroot, and to do that we need to bind mount some stuff
+  # yes we could use individual mount modules, but that would take ages
+    - name: mount dev, sys and proc
+      shell: mount --bind /dev /mnt/dev && mount --bind /sys /mnt/sys && mount -t proc proc /mnt/proc
+
+    - name: install grub within the chroot
+      shell: chroot /mnt/ /bin/bash -c "grub-install --removable --target=x86_64-efi --efi-directory=/efi --bootloader-id=GRUB"
+
+    - name: create the grub config within the chroot
+      shell: chroot /mnt/ /bin/bash -c "grub-mkconfig -o /boot/grub/grub.cfg"
+
+ # IF we want to set any paritular stuff here. e.g hostname, static ips etc.. etc.. just do it directly on the files (not in a chroot)
