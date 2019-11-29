@@ -1,0 +1,12 @@
+[Match]
+Name=eth0
+
+[Network]
+{% if net_ipaddr is defined %}
+Address={{ net_ipaddr }}
+Gateway={{ net_gw }}
+DNS={{ net_dns }}
+Domains={{ net_search }}
+{% else %}
+DHCP=ipv4
+{% endif %}

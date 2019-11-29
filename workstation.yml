@@ -1,4 +1,3 @@
----
 # this MUST be run as root, so that it can create the non priviledged user.
 # VARS - take network config so we can specify things like search domain.
 
@@ -18,11 +17,13 @@
 
 - hosts: all
   tasks:
+
 # update the mirrors list
     - name: download pacman mirror list
       get_url:
-        url: "https://www.archlinux.org/mirrorlist/?country=US&country=GB&protocol=http&ip_version=4&use_mirror_status=on"
+        url: "https://www.archlinux.org/mirrorlist/?country=DE&country=US&protocol=http&protocol=https&ip_version=4&use_mirror_status=on"
         dest: "/etc/pacman.d/mirrorlist"
+        force: yes
 
     - name: "uncomment `#Server` in pacman mirror list"
       replace:
@@ -87,6 +88,7 @@
         - xorg
         - xorg-xinit
       tags: packages
+      notify: "enable & start sddm.service"
 
 # Allow members of wheel to privilege escalate without a password
     - name: allow wheel passwordless sudo privs.
@@ -122,26 +124,22 @@
         group: dylanh
       tags:
         - createuser
-#
- 
-## configuration
+
+    - name: copy in the xorg for this host. NOTE this assumes the file is in files/hostname/xorg.conf. The file may be empty where such a file is not required.
+      copy:
+        src: "files/{{ inventory_hostname }}/xorg.conf"
+        dest: /etc/X11/xorg.conf
+        group: wheel
+        mode: '0775'
+
     - name: get an xorg configuration using nvidia-xconfig
       command: /usr/bin/nvidia-xconfig
       args:
         creates: /etc/X11/xorg.conf
 
-# this means we can use the nvidia-settings kde app to configure the displays, and save the configuration
-# in the app without it complaining about permissions.
- 
     - name: make the xorg configuration editable by uses in the wheel group (me)
       file:
         path: /etc/X11
-        group: wheel
-        mode: '0775'
-
-    - name: make the file created by nvidia-xconfig writable by wheel
-      file:
-        path: /etc/X11/xorg.conf
         group: wheel
         mode: '0775'
 
@@ -149,7 +147,7 @@
       copy:
         dest: /home/dylanh/.xinitrc
         content: |
-          exec startkde
+          exec /usr/bin/startplasma-x11
         owner: dylanh
         group: dylanh
 
@@ -313,18 +311,50 @@
       tags:
         - stickybit
 
+# check the files/plasma folder for configs
+    - name: All of this needs doing on local host, so we can copy the resulting plasma ini files to the target
+      block:
 
-# Network config - make sure the correct dns servers and search domains are set (systemd)
-# /etc/systemd/network/10-eth0.link
-# /etc/systemd/network/20-wired.network
+        - name: find plasma config files to install
+          find:
+            path: "files/plasma"
+            patterns: "*"
+          register: plasmaconfigs
 
-    - name: copy in the kde config
-      synchronize:
-        src: ./files/plasma/
-        dest: /home/dylanh/.config/
+        - name: make sure any old staging areas / repos are not there
+          file:
+            path: "{{ item }}"
+            state: absent
+          with_items:
+           - "files/stag/{{ ansible_hostname }}"
+           - files/inimerger
 
-    - name: fix the permissions
-      file:
-        path: /home/dylanh/.config
+        - name: make a staging area
+          file:
+            path: "files/stage/{{ ansible_hostname }}"
+            state: directory
+
+        - name: we need the inimerger, so lets clone that repo locally
+          git:
+            repo: 'https://gitea.sectigo.net/dylanh/inimerger.git'
+            dest: files/inimerger
+
+        - name: we need the inimerger, so lets clone that repo locally
+          git:
+            repo: 'https://gitea.sectigo.net/dylanh/inimerger.git'
+            dest: files/inimerger
+
+        - name: merge with any overrides
+          command: "files/inimerger/inimerge.py -o files/stage/{{ ansible_hostname }}/{{ item.path | basename }} {{ item.path }} files/{{ ansible_hostname }}/{{ item.path | basename }}"
+          with_items: "{{ plasmaconfigs.files }}"
+
+      delegate_to: localhost
+
+    - name: now copy the resulting files to the .config folder.
+      copy:
+        src: "files/stage/{{ ansible_hostname}}/{{ item.path | basename }}"
+        dest: "/home/dylanh/.config/{{ item.path | basename }}"
         owner: dylanh
         group: dylanh
+        mode: '0600'
+      with_items: "{{ plasmaconfigs.files }}"

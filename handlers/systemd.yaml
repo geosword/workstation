@@ -1,0 +1,5 @@
+- name: enable & start sddm.service
+  systemd:
+    state: started
+    name: sddm.service
+    enabled: yes

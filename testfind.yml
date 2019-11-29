@@ -1,0 +1,28 @@
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+
+  - name: set the host for testing
+    set_fact:
+      currenthost: "hoff"
+
+  - name: we need the inimerger, so lets clone that repo locally
+    git:
+      repo: 'https://gitea.sectigo.net/dylanh/inimerger.git'
+      dest: files/inimerger
+
+  - name: find plasma config files to install
+    find:
+      path: "files/plasma"
+      patterns: "*"
+    register: plasmaconfigs
+
+  - name: make a staging area
+    file:
+      path: "files/stage/{{ currenthost }}"
+      state: directory
+
+  - name: merge with any overrides
+    command: "files/inimerger/inimerge.py -o files/stage/{{ currenthost }}/{{ item.path | basename }} {{ item.path }} files/plasma/{{ currenthost }}/{{ item.path | basename }}"
+    with_items: "{{ plasmaconfigs.files }}"

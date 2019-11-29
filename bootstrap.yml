@@ -4,12 +4,20 @@
       prompt: "Enter the name of the drive to repartition e.g. /dev/sda MAKE SURE YOU GET THIS RIGHT!!!"
       private: no
     - name: "imageName"
-      promtp: "Enter the name of the image to use for the root partition e.g. arch_092019v1.1.tar.gz"
+      prompt: "Enter the url of the image to use for the root partition e.g. http://archlinux.mirrors.uk2.net/iso/2019.09.01/archlinux-bootstrap-2019.09.01-x86_64.tar.gz"
       private: no
 
   tasks:
+    # This also protects us from accidentally running
     - name: check its a system rescue cd, if not, fail
       shell: "/sbin/uname -a | grep sysresccd"
+    # NO YOU DONT NEED TO CHECK THE RETURN CODE BECAUSE GREP WOULD RETURN 1 and cause a failure
+
+    - name: check that limit has been set and that its just one host
+      fail:
+        msg: "Use --limit to limit the play to one host, otherwise bad things might happen"
+      when:
+        - "ansible_play_hosts | length >1"
 
   #    - name: Wait for confirmation
   #      pause:
@@ -35,7 +43,6 @@
         - sys
         - efi
         - 
-
 
     - name: read the partitions on the disk
       parted: "device={{ primaryDisk }} unit=MiB"
@@ -101,23 +108,48 @@
         fstype: ext4
         state: mounted
 
-    # because of the limited space available on a live image, we are going to need to copy the archive to the root parition first, and then 
-    # extract it using remote_src.
-    # The only way around this and STILL JUST using unarchive is to edit ansible.cfg, which is a PITA, AND the temporary folder will NOT be accessible until
-    # after we've formatted it and mounted it, so probably NOT an option anyway
+    # Using unaechive will NOT work because it will want to download to the temp folder in root again, and will fill up the root disk.
+    # So we're going to use wget instead.
+    - name: Download the latest root image from the web
+      command: "wget -O /mnt/arch.tar.gz {{ imageName }}"
+      args:
+        warn: false
 
-    # The copy module does the same, even with unsafe_writes on. So we've going to have to resort to a command module
+    - name: uncompress the root image
+      command: tar -zxvf /mnt/arch.tar.gz --strip-components=1 -C /mnt
+      args:
+        warn: false
 
-    - name: copy the archive to the root partition (not extracting)
-      command: "scp files/{{ imageName }} {{ inventory_hostname }}:/mnt/"
-      delegate_to: localhost
+    # Now we can adjust the root image to do sensible things like, use a UK keyboard, use networking
+    # Generate locales etc.
+    - name: Set the timezone
+      file:
+        src: /mnt/usr/share/zoneinfo/Europe/London
+        dest: /etc/localtime
+        state: link
 
-    - name: extract the root image.
-      unarchive:
-        src: "/mnt/{{ imageName }}"
-        dest: "/mnt"
-        remote_src: yes
+    - name: set the keymap
+      copy:
+        dest: /mnt/etc/vconsole.conf
+        content: "KEYMAP=uk"
 
+    #-CHANGE THIS TO SET THE HOSTNAME ACCORDING TO SOMETHING ELSE MAC? 
+    - name: set the hostname
+      copy:
+        dest: /mnt/etc/hostname
+        content: arch
+
+    - name: set the locale
+      copy:
+        dest: /mnt/etc/locale.conf
+        content: "LANG=en_GB.UTF-8"
+
+    - name: set the hosts file
+      copy:
+        dest: /mnt/etc/hosts
+        content: "127.0.0.1 localhost\n::1 localhost\n"
+
+  # mount point will be created if it doesnt exist
     - name: now mount the efi partition
       mount:
         path: /mnt/efi
@@ -125,20 +157,113 @@
         fstype: vfat
         state: mounted
 
-    - name: get rid of the root image
-      file:
-        path: "/mnt/{{ imageName }}"
-        state: absent
+    - name: copy the dns config from system rescue to the chroot
+      copy: 
+        src: /etc/resolv.conf
+        dest: /mnt/etc/resolv.conf
+        remote_src: yes
+
+    - name: download pacman mirror list
+      get_url:
+        url: "https://www.archlinux.org/mirrorlist/?country=GB&protocol=http&protocol=https&ip_version=4"
+        dest: "/mnt/etc/pacman.d/mirrorlist"
+
+    - name: "uncomment `#Server` in pacman mirror list"
+      replace:
+        dest: "/mnt/etc/pacman.d/mirrorlist"
+        regexp: '^#Server'
+        replace: 'Server'
 
   # now we need to chroot, and to do that we need to bind mount some stuff
   # yes we could use individual mount modules, but that would take ages
     - name: mount dev, sys and proc
       shell: mount --bind /dev /mnt/dev && mount --bind /sys /mnt/sys && mount -t proc proc /mnt/proc
+      args:
+        warn: false
 
     - name: install grub within the chroot
       shell: chroot /mnt/ /bin/bash -c "grub-install --removable --target=x86_64-efi --efi-directory=/efi --bootloader-id=GRUB"
 
+    - name: Edit the grub defaults.
+      replace:
+        dest: "/mnt/etc/default/grub"
+        regexp: '^GRUB_CMDLINE_LINUX_DEFAULT="quiet"'
+        replace: 'GRUB_CMDLINE_LINUX_DEFAULT="net.ifnames=0 biosdevname=0"'
+
     - name: create the grub config within the chroot
       shell: chroot /mnt/ /bin/bash -c "grub-mkconfig -o /boot/grub/grub.cfg"
 
+    - name: Install openssh
+      shell: chroot /mnt/ /bin/bash -c "pacman -S --noconfirm openssh"
+
+    - name: enable some services
+      shell: chroot /mnt/ /bin/bash -c "systemctl enable {{ item }}"
+      with_items:
+        - systemd-networkd
+        - systemd-resolved
+        - sshd
+
+    - name: make sure the root .ssh folder exists
+      file:
+        path: /mnt/root/.ssh
+        state: directory
+        mode: u=rwx,g-rwx,o-rwx
+
+    - name: add your public key to the root user to allow later easy sshing
+      copy:
+        dest: /mnt/root/.ssh/authorized_keys
+        content: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDKdO7SxPwNT9dYD6XwxrlzzYjQahwZW7IqKebpqjafBLBRL+EOgSWK9nADQNAVJvp+qpzFzvt48M99C9sPMaFkNqo3kdmM1GEsTncu8AuJ+DuyJeSsndHAWlAftT2GN+aEbCPIPRU7DIpELud8RyyTkHCIWxhgbKo5v5pIVMFWgKw6g935D0KCk6ysNyrG3O8TMThFeudFN9zafsCDciHAUckN9t6642WOs9C8zcDvQczUL15/1tBxK1pBA/peydajkO3VYv9t3bKnX3W4iHDRQO/oOlRGZyxskI4J8sAHak2WiUaq3yRcfC1YaDrPFT3K8pzUXa3NDvzQxjpe17uP dylan@hoff.brad.office.ccanet.co.uk
+
  # IF we want to set any paritular stuff here. e.g hostname, static ips etc.. etc.. just do it directly on the files (not in a chroot)
+ 
+    - name: set the hostname
+      copy:
+        dest: /mnt/etc/hostname
+        content: "{{ inventory_hostname }}"
+
+    # If you just want DHCP then dont create a network set_task task for it
+   
+    - name: set some network settings geosword
+      set_fact:
+        net_ipaddr: 10.10.4.100/24
+        net_gw: 10.10.4.1
+        net_dns: 10.10.4.11
+        net_search: sysadminology.net
+      when:
+        - inventory_hostname =='geosword'
+
+    - name: set some network settings redeye
+      set_fact:
+        net_ipaddr: 10.10.4.101/24
+        net_gw: 10.10.4.1
+        net_dns: 10.10.4.11
+        net_search: sysadminology.net
+      when:
+        - inventory_hostname =='redeye'
+
+    - name: set some network settings milano
+      set_fact:
+        net_ipaddr: 10.100.38.120/24
+        net_gw: 10.100.38.1
+        net_dns: 10.127.10.127
+        net_search: mcr.office.comodoca.net
+      when:
+        - inventory_hostname =='milano'
+
+    - name: set some network settings hoff
+      set_fact:
+        net_ipaddr: 192.168.0.120/24
+        net_gw: 192.168.0.10
+        net_dns: 10.127.10.127
+        net_search: brad.office.comodoca.net
+      when:
+        - inventory_hostname =='hoff'
+
+    - name: set network settings 
+      template:
+        src: templates/network.network.j2
+        dest: /mnt/etc/systemd/network/20-wired.network
+
+#TODO we COULD instigate a reboot here - or make it part of a "super playbook", and let it handle the reboot, and associated wait for it to come backup
+# because you would need to add_host the host based on the ip set above.... hmmm...
+
