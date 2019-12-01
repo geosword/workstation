@@ -1,5 +1,6 @@
 [ActivityManager]
 _k_friendly_name=Activity Manager
+switch-to-activity-ffca5dea-2cc4-40eb-9dd6-ecf5e01ed332=none,none,Switch to activity "Default"
 
 [KDE Keyboard Layout Switcher]
 Switch keyboard layout to English (US)=none,none,Switch keyboard layout to English (US)
@@ -23,8 +24,8 @@ display=Display\tMeta+P,Display\tMeta+P,Switch Display
 
 [khotkeys]
 _k_friendly_name=KDE Daemon
+{ba4c04af-bdd2-4cb2-bb95-b486028ef7c0}=Ctrl+Alt+T,none,Launch Konsole
 {d03619b6-9b3c-48cc-9d9c-a2aadb485550}=,none,Search
-{d2af65b6-d7ef-4980-981f-de90dcc3bf26}=Ctrl+Alt+T,none,Launch Konsole
 
 [kmix]
 _k_friendly_name=Audio Volume
@@ -128,7 +129,7 @@ Window Fullscreen=none,none,Make Window Fullscreen
 Window Grow Horizontal=none,none,Pack Grow Window Horizontally
 Window Grow Vertical=none,none,Pack Grow Window Vertically
 Window Lower=none,none,Lower Window
-Window Maximize=Meta+PgUp,Meta+PgUp,Maximize Window
+Window Maximize=Meta+Up,none,Maximize Window
 Window Maximize Horizontal=none,none,Maximize Window Horizontally
 Window Maximize Vertical=none,none,Maximize Window Vertically
 Window Minimize=Meta+PgDown,Meta+PgDown,Minimize Window
@@ -194,10 +195,6 @@ view_actual_size=,Meta+0,Actual Size
 view_zoom_in=Meta+=,Meta+=,Zoom In
 view_zoom_out=Meta+-,Meta+-,Zoom Out
 
-[org.kde.dolphin.desktop]
-_k_friendly_name=Dolphin
-_launch=Meta+E,Meta+E,Dolphin
-
 [org_kde_powerdevil]
 Decrease Keyboard Brightness=Keyboard Brightness Down,Keyboard Brightness Down,Decrease Keyboard Brightness
 Decrease Screen Brightness=Monitor Brightness Down,Monitor Brightness Down,Decrease Screen Brightness
@@ -236,3 +233,4 @@ show dashboard=Ctrl+F12,Ctrl+F12,Show Desktop
 show-barcode=none,none,Show Barcode...
 show-on-mouse-pos=none,none,Open Klipper at Mouse Position
 stop current activity=Meta+S,Meta+S,Stop Current Activity
+

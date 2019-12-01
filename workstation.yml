@@ -10,18 +10,35 @@
       ignore_errors: true
       register: pythoninstalled
 
+    - name: Synchronise the package databases
+      raw : /usr/bin/pacman -Syy
+
     - name: install python if its not there.
-      raw: pacman -S --noconfirm python2
+      raw: /usr/bin/pacman -S --noconfirm python2
       when:
         - pythoninstalled.rc != 0
 
 - hosts: all
   tasks:
+    - name: include some global variables
+      include_vars: "{{ item }}"
+      with_items:
+        - vars/main.yml
+
+    - name: make sure any old staging areas / repos are not there
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+       - "files/stag/{{ ansible_hostname }}"
+       - files/inimerger
+       - files/stock
+      delegate_to: localhost
 
 # update the mirrors list
     - name: download pacman mirror list
       get_url:
-        url: "https://www.archlinux.org/mirrorlist/?country=DE&country=US&protocol=http&protocol=https&ip_version=4&use_mirror_status=on"
+        url: "https://www.archlinux.org/mirrorlist/?country=GB&country=DE&country=US&protocol=http&protocol=https&ip_version=4&use_mirror_status=on"
         dest: "/etc/pacman.d/mirrorlist"
         force: yes
 
@@ -30,6 +47,9 @@
         dest: "/etc/pacman.d/mirrorlist"
         regexp: '^#Server'
         replace: 'Server'
+
+    - name: Synchronise the package databases
+      command: /usr/bin/pacman -Syy
 
     - name: "uncomment colors"
       lineinfile:
@@ -41,9 +61,7 @@
 
 # install a bunch of stuff
     - name: install a bunch of stuff
-      package:
-        name: "{{ item }}"
-        state: present
+      command: "/usr/bin/pacman -S --noconfirm {{ item }}"
       with_items:
 # basic stuff
         - base-devel
@@ -61,8 +79,8 @@
         - grub
         - hwinfo
         - ipcalc
+        - icu
         - kcalc
-        - keychain
         - keychain
         - keepassxc
         - konsole
@@ -87,15 +105,44 @@
         - xdotool
         - xorg
         - xorg-xinit
+      ignore_errors: true
       tags: packages
-      notify: "enable & start sddm.service"
 
-# Allow members of wheel to privilege escalate without a password
-    - name: allow wheel passwordless sudo privs.
-      replace:
-        dest: "/etc/sudoers"
-        regexp: "^# %wheel ALL=\\(ALL\\) NOPASSWD"
-        replace: "%wheel ALL=(ALL) NOPASSWD"
+# Install sublime text
+    - name: fetch sublime repo key for arch
+      get_url: 
+        url: https://download.sublimetext.com/sublimehq-pub.gpg
+        dest: /var/tmp/sublimehq-pub.gpg
+      tags: installsublime
+
+    - name: add the key
+      command: pacman-key --add /var/tmp/sublimehq-pub.gpg
+      tags: installsublime
+
+    - name: sign it
+      command: pacman-key --lsign-key 8A8F901A
+      tags: installsublime
+
+    - name: remove the key from /var/tmp
+      file:
+        path: /var/tmp/sublimehq-pub.gpg
+        state: absent
+      tags: installsublime
+
+   # add the sublime repo to pacman.conf
+    - name: add sublime repo to pacman.conf
+      blockinfile:
+        path: /etc/pacman.conf
+        block: |
+          [sublime-text]
+          Server = https://download.sublimetext.com/arch/dev/x86_64
+      tags: installsublime
+
+    - name: now install. We'll use command cause we need special pacman flags (-uy) This could take a while, check /var/log/pacman.log for progress
+      command: pacman -Syu --noconfirm sublime-text
+      args:
+        creates: /opt/sublime_text/sublime_text
+      tags: installsublime
 
 ## create the group for the non privileged user
     - name: create group
@@ -111,13 +158,13 @@
         shell: /bin/bash
 # lp group allows bluetooth access, wheel allows root access to things
         groups: wheel,dylanh,lp
-        home: /home/dylanh
+        home: "{{ userdir }}"
       tags:
         - createuser
 
     - name: create the .ssh folder
       file:
-        path: /home/dylanh/.ssh
+        path: "{{ userdir }}/.ssh"
         mode: '0700'
         state: directory
         owner: dylanh
@@ -125,138 +172,9 @@
       tags:
         - createuser
 
-    - name: copy in the xorg for this host. NOTE this assumes the file is in files/hostname/xorg.conf. The file may be empty where such a file is not required.
-      copy:
-        src: "files/{{ inventory_hostname }}/xorg.conf"
-        dest: /etc/X11/xorg.conf
-        group: wheel
-        mode: '0775'
-
-    - name: get an xorg configuration using nvidia-xconfig
-      command: /usr/bin/nvidia-xconfig
-      args:
-        creates: /etc/X11/xorg.conf
-
-    - name: make the xorg configuration editable by uses in the wheel group (me)
-      file:
-        path: /etc/X11
-        group: wheel
-        mode: '0775'
-
-    - name: xinitrc
-      copy:
-        dest: /home/dylanh/.xinitrc
-        content: |
-          exec /usr/bin/startplasma-x11
-        owner: dylanh
-        group: dylanh
-
-    - name: create an sddm config drop in folder
-      file: 
-        path: /etc/sddm.conf.d/
-        state: directory
-        mode: '0755'
-
-    - name: create the sddm theme drop in
-      copy:
-        dest: /etc/sddm.conf.d/theme.conf
-        content: |
-          [Theme]
-          Current=breeze
-          CursorTheme=
-          DisableAvatarsThreshold=7
-          EnableAvatars=true
-          FacesDir=/usr/share/sddm/faces
-          ThemeDir=/usr/share/sddm/themes
-
-# this just checks out the repo, you still need to cd to it and run makepkg -s
-    - name: clone google-chrome repo
-      git:
-        repo: https://aur.archlinux.org/google-chrome.git
-        dest: /usr/src/google-chrome
-        update: no
-
-    - name: make google-chrome source code available to me
-      file: 
-        path: /usr/src/google-chrome
-        group: wheel
-        mode: '0775'
-
-    - name: run makepkg in the google-chrome folder we just made
-      command: chdir=/usr/src/google-chrome makepkg -s --noconfirm
-      args:
-        creates: /usr/src/google-chrome/google-chrome-*.pkg.tar.xz
-      become: true
-      become_user: dylanh
-
-# This pattern could be a bit loose
-    - name: get a list of pkg.tar.xz files to install
-      find:
-        paths: /usr/src/google-chrome/
-        patterns: '*.pkg.tar.xz'
-      register: chromepackage
-
-# now to install it, provided it not installed.
-    - name: debug
-      debug:
-        msg: "file to install is {{ chromepackage.files }}"
-
-    - name: now install the package we just makepkg'd. I hope we can install using wildcards.
-      command: chdir=/usr/src/google-chrome pacman -U --noconfirm {{ item.path | basename }}
-      with_items: "{{ chromepackage.files }}"
-      failed_when: chromepackage.matched == 0
-      args:
-        creates: /usr/bin/google-chrome-stable
-      when:
-        - chromepackage.matched > 0
-
-
-# Install sublime text
-    - name: fetch sublime repo key for arch
-      get_url: 
-        url: https://download.sublimetext.com/sublimehq-pub.gpg
-        dest: /var/tmp/sublimehq-pub.gpg
-    - name: add the key
-      command: pacman-key --add /var/tmp/sublimehq-pub.gpg
-    - name: sign it
-      command: pacman-key --lsign-key 8A8F901A
-    - name: remove the key from /var/tmp
-      file:
-        path: /var/tmp/sublimehq-pub.gpg
-        state: absent
-   # add the sublime repo to pacman.conf
-    - name: add sublime repo to pacman.conf
-      blockinfile:
-        path: /etc/pacman.conf
-        block: |
-          [sublime-text]
-          Server = https://download.sublimetext.com/arch/dev/x86_64
-
-    - name: now install. We'll use command cause we need special pacman flags (-uy) This could take a while, check /var/log/pacman.log for progress
-      command: pacman -Syu --noconfirm sublime-text
-      args:
-        creates: /opt/sublime_text/sublime_text
-
-# bash configuration
-    - name: install bash_profile
-      copy:
-        dest: /home/dylanh/.bash_profile
-        mode: '0644'
-        content: |
-          if [ -f ~/.bashrc ]; then
-          	. ~/.bashrc
-          fi
-
-    - name: install bashrc
-      copy:
-        dest: /home/dylanh/.bashrc
-        src: files/bash/bashrc
-        owner: dylanh
-        mode: '0644'
-
 # we going to use systemd-resolved against my better judgement
     - name: replace /etc/resolv.conf with a link to system-resolved configuration
-      file: 
+      file:
         src: /run/systemd/resolve/stub-resolv.conf
         dest: /etc/resolv.conf
         state: link
@@ -284,25 +202,6 @@
           nls_cp437
           nls_iso8859-1
 
-    - name: create some helpful folders
-      file:
-        path: "/home/dylanh/{{ item }}"
-        state: directory
-        mode: "0755"
-        group: "dylanh"
-        owner: "dylanh"
-      become: true
-      become_user: dylanh
-      with_items: ["development",".config"]
-      tags:
-        - createfolders
-
-# Some stuff for when we are testing with vagrant
-    - name: Include virtualbox operations if we are in virtualbox
-      include: virtualbox.yaml
-      when: 
-        - ansible_virtualization_type == 'virtualbox'
-
 # Avoid "xf86EnableIOPorts: failed to set IOPL for I/O (Operation not permitted)"  when using startx as user
     - name: Add the sticky bit to /usr/bin/xinit
       file:
@@ -311,50 +210,129 @@
       tags:
         - stickybit
 
-# check the files/plasma folder for configs
-    - name: All of this needs doing on local host, so we can copy the resulting plasma ini files to the target
-      block:
+# Allow members of wheel to privilege escalate without a password
+    - name: allow wheel passwordless sudo privs
+      replace:
+        dest: "/etc/sudoers"
+        regexp: "^# %wheel ALL=\\(ALL\\) NOPASSWD"
+        replace: "%wheel ALL=(ALL) NOPASSWD"
 
-        - name: find plasma config files to install
-          find:
-            path: "files/plasma"
-            patterns: "*"
-          register: plasmaconfigs
 
-        - name: make sure any old staging areas / repos are not there
-          file:
-            path: "{{ item }}"
-            state: absent
-          with_items:
-           - "files/stag/{{ ansible_hostname }}"
-           - files/inimerger
-
-        - name: make a staging area
-          file:
-            path: "files/stage/{{ ansible_hostname }}"
-            state: directory
-
-        - name: we need the inimerger, so lets clone that repo locally
-          git:
-            repo: 'https://gitea.sectigo.net/dylanh/inimerger.git'
-            dest: files/inimerger
-
-        - name: we need the inimerger, so lets clone that repo locally
-          git:
-            repo: 'https://gitea.sectigo.net/dylanh/inimerger.git'
-            dest: files/inimerger
-
-        - name: merge with any overrides
-          command: "files/inimerger/inimerge.py -o files/stage/{{ ansible_hostname }}/{{ item.path | basename }} {{ item.path }} files/{{ ansible_hostname }}/{{ item.path | basename }}"
-          with_items: "{{ plasmaconfigs.files }}"
-
-      delegate_to: localhost
-
-    - name: now copy the resulting files to the .config folder.
+    - name: copy in the xorg for this host. NOTE this assumes the file is in files/hostname/xorg.conf. The file may be empty where such a file is not required.
       copy:
-        src: "files/stage/{{ ansible_hostname}}/{{ item.path | basename }}"
-        dest: "/home/dylanh/.config/{{ item.path | basename }}"
+        src: "files/{{ inventory_hostname }}/xorg.conf"
+        dest: /etc/X11/xorg.conf
+        group: wheel
+        mode: '0775'
+
+    - name: get an xorg configuration using nvidia-xconfig
+      command: /usr/bin/nvidia-xconfig
+      args:
+        creates: /etc/X11/xorg.conf
+
+    - name: make the xorg configuration editable by users in the wheel group (me)
+      file:
+        path: /etc/X11
+        group: wheel
+        mode: '0775'
+
+    - name: xinitrc
+      copy:
+        dest: "{{ userdir }}/.xinitrc"
+        content: |
+          exec /usr/bin/startplasma-x11
         owner: dylanh
         group: dylanh
-        mode: '0600'
-      with_items: "{{ plasmaconfigs.files }}"
+
+    - name: create an sddm config drop in folder
+      file: 
+        path: /etc/sddm.conf.d/
+        state: directory
+        mode: '0755'
+      tags:
+        - sddmconfig
+
+    - name: create the sddm theme drop in
+      copy:
+        dest: /etc/sddm.conf.d/theme.conf
+        content: |
+          [Theme]
+          Current=breeze
+          CursorTheme=
+          DisableAvatarsThreshold=7
+          EnableAvatars=true
+          FacesDir=/usr/share/sddm/faces
+          ThemeDir=/usr/share/sddm/themes
+      tags:
+        - sddmconfig
+
+    - name: create autologin.conf
+      copy:
+        dest: /etc/sddm.conf.d/autologin.conf
+        content: |
+          [Autologin]
+          Relogin=false
+          Session=plasma.desktop
+          User=dylanh
+      tags:
+        - sddmconfig
+
+    - name: enable & start sddm
+      systemd:
+        state: started
+        name: sddm.service
+        enabled: true
+
+# Some stuff for when we are testing with vagrant
+    - name: Include virtualbox operations if we are in virtualbox
+      include: virtualbox.yaml
+      when: 
+        - ansible_virtualization_type == 'virtualbox'
+
+# this just checks out the repo, you still need to cd to it and run makepkg -s
+    - name: clone google-chrome repo
+      git:
+        repo: https://aur.archlinux.org/google-chrome.git
+        dest: /usr/src/google-chrome
+        update: no
+      tags:
+        - installchrome
+
+    - name: make google-chrome source code available to me
+      file: 
+        path: /usr/src/google-chrome
+        group: wheel
+        mode: '0775'
+      tags:
+        - installchrome
+
+    - name: run makepkg in the google-chrome folder we just made
+      command: chdir=/usr/src/google-chrome makepkg -s --noconfirm
+      args:
+        creates: /usr/src/google-chrome/google-chrome-*.pkg.tar.xz
+      become: true
+      become_user: dylanh
+      tags:
+        - installchrome
+
+# This pattern could be a bit loose
+    - name: get a list of pkg.tar.xz files to install
+      find:
+        paths: /usr/src/google-chrome/
+        patterns: '*.pkg.tar.xz'
+      register: chromepackage
+      tags:
+        - installchrome
+
+# now to install it, provided it not installed.
+    - name: now install the package we just makepkg'd. I hope we can install using wildcards.
+      command: chdir=/usr/src/google-chrome pacman -U --noconfirm {{ item.path | basename }}
+      with_items: "{{ chromepackage.files }}"
+      failed_when: chromepackage.matched == 0
+      args:
+        creates: /usr/bin/google-chrome-stable
+      when:
+        - chromepackage.matched > 0
+      tags:
+        - installchrome
+

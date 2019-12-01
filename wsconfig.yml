@@ -1,0 +1,116 @@
+# The idea of this playbook is that it maintains the configuration of the workstation, rather than boot strapping it
+# Currently it handles three specific files of plasma, but could also manage tmux, vim or anything else we can resonably control
+# with config files
+- hosts: all
+  tasks:
+    - name: include some global variables
+      include_vars: "{{ item }}"
+      with_items:
+        - vars/main.yml
+
+    - name: create some helpful folders
+      file:
+        path: "{{ userdir }}/{{ item }}"
+        state: directory
+        mode: "0755"
+        group: "dylanh"
+        owner: "dylanh"
+      become: true
+      become_user: dylanh
+      with_items: ["development"]
+      tags:
+        - createfolders
+
+    - name: make sure any old staging areas / repos are not there
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+       - "files/stag/{{ inventory_hostname }}"
+       - files/inimerger
+       - files/stock
+      delegate_to: localhost
+
+# files/stock is config copied FROM a workstation
+# files/stage is config processed by the playbook and ready to copy to the workstation
+    - name: make sure local work folders exist
+      file:
+        path: "{{ item }}"
+        state: directory
+      delegate_to: localhost
+      with_items:
+        - files/stock
+        - files/stage
+        - "files/stage/{{ inventory_hostname}}"
+        - "files/stage/{{ inventory_hostname}}/.config"
+
+
+# By this point we should have "stock" plasma files in /home/dylanh/.config because of the auto login configuration on sddm, so pull those files down
+    - name: fetch plasma stock configs
+      fetch: 
+        src: "{{ userdir }}/.config/{{ item }}"
+        dest: "files/stock/"
+      with_items:
+         - kdeglobals
+         - kglobalshortcutsrc
+         - khotkeysrc
+
+# check the files/plasma folder for configs
+    - name: All of this needs doing on local host, so we can copy the resulting plasma ini files to the target
+      block:
+
+        - name: find plasma config files - The ones we just downloaded from the host
+          find:
+            path: "files/stock/{{ inventory_hostname }}/{{ userdir }}/.config/"
+            patterns: "*"
+          register: plasmaconfigs
+
+        - name: we need the inimerger, so lets clone that repo locally
+          git:
+            repo: 'https://gitea.sectigo.net/dylanh/inimerger.git'
+            dest: files/inimerger
+
+        - name: merge with any overrides
+          command: "files/inimerger/inimerge.py -o files/stage/{{ inventory_hostname }}/.config/{{ item.path | basename }} {{ item.path }} files/defaults/.config/{{ item.path | basename }} files/{{ inventory_hostname }}/plasma/{{ item.path | basename }}"
+          with_items: "{{ plasmaconfigs.files }}"
+
+      delegate_to: localhost
+      tags: mergeinis
+
+    - name: now copy the resulting files to the .config folder.
+      copy:
+        src: "files/stage/{{ inventory_hostname }}/.config/{{ item.path | basename }}"
+        dest: "{{ userdir }}/.config/{{ item.path | basename }}"
+        owner: dylanh
+        group: dylanh
+        mode: '0600'
+      with_items: "{{ plasmaconfigs.files }}"
+
+      # for testing, its cool to just to restart the session
+      systemd:
+        state: restarted
+        name: sddm.service
+      when: inventory_hostname == 'vbox'
+
+# bash configuration
+    - name: install bash_profile
+      copy:
+        dest: "{{ userdir }}/.bash_profile"
+        mode: '0644'
+        content: |
+          if [ -f ~/.bashrc ]; then
+          	. ~/.bashrc
+          fi
+      tags:
+        - createuser
+
+      #    - name: install bashrc
+      #      copy:
+      #        dest: "{{ userdir }}/.bashrc"
+      #        src: files/bash/bashrc
+      #        owner: dylanh
+      #        mode: '0644'
+      #      tags:
+      #        - createuser
+
+

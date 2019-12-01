@@ -1,4 +1,4 @@
-- name: enable & start sddm.service
+- name: "enable & start sddm.service"
   systemd:
     state: started
     name: sddm.service
