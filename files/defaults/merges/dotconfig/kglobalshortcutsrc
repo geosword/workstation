@@ -3,4 +3,3 @@ Window Maximize=Meta+Up,none,Maximize Window
 Window Minimize=Meta+Down,none,Minimize Window
 Window Fullscreen=Meta+Shift+F,none,Make Window Fullscreen
 Window Close=Alt+Q,none,Close Window
-

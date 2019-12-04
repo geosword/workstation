@@ -64,7 +64,7 @@ TriggersCount=1
 [Data_1_2Triggers0]
 Key=Ctrl+Alt+T
 Type=SHORTCUT
-Uuid={ba4c04af-bdd2-4cb2-bb95-b486028ef7c0}
+Uuid={a7d68c9a-66a7-43f4-95e0-4e46ca00279c}
 
 [Data_2]
 Comment=This group contains various examples demonstrating most of the features of KHotkeys. (Note that this group and all its actions are disabled by default.)
@@ -117,7 +117,7 @@ TriggersCount=1
 [Data_2_1Triggers0]
 Key=Ctrl+Alt+I
 Type=SHORTCUT
-Uuid={361c7e74-a170-4134-b886-2bfb66a5f609}
+Uuid={45a66cf7-7124-482d-9735-6b15d84353fa}
 
 [Data_2_2]
 Comment=After pressing Alt+Ctrl+H the input of 'Hello' will be simulated, as if you typed it.  This is especially useful if you have call to frequently type a word (for instance, 'unsigned').  Every keypress in the input is separated by a colon ':'. Note that the keypresses literally mean keypresses, so you have to write what you would press on the keyboard. In the table below, the left column shows the input and the right column shows what to type.\n\n"enter" (i.e. new line)                Enter or Return\na (i.e. small a)                          A\nA (i.e. capital a)                       Shift+A\n: (colon)                                  Shift+;\n' '  (space)                              Space
@@ -144,7 +144,7 @@ TriggersCount=1
 [Data_2_2Triggers0]
 Key=Ctrl+Alt+H
 Type=SHORTCUT
-Uuid={732d9906-6efc-444b-8dbe-c4cdd2bafd49}
+Uuid={d32d2de0-6c8d-435b-be42-0268bbb3e809}
 
 [Data_2_3]
 Comment=This action runs Konsole, after pressing Ctrl+Alt+T.
@@ -170,7 +170,7 @@ TriggersCount=1
 [Data_2_3Triggers0]
 Key=Ctrl+Alt+T
 Type=SHORTCUT
-Uuid={af7a1b7b-dd9f-48fa-8d03-38808433a686}
+Uuid={c01ddfb5-07ca-4cb6-a834-4383cb986701}
 
 [Data_2_4]
 Comment=Read the comment on the "Type 'Hello'" action first.\n\nQt Designer uses Ctrl+F4 for closing windows.  In KDE, however, Ctrl+F4 is the shortcut for going to virtual desktop 4, so this shortcut does not work in Qt Designer.  Further, Qt Designer does not use KDE's standard Ctrl+W for closing the window.\n\nThis problem can be solved by remapping Ctrl+W to Ctrl+F4 when the active window is Qt Designer. When Qt Designer is active, every time Ctrl+W is pressed, Ctrl+F4 will be sent to Qt Designer instead. In other applications, the effect of Ctrl+W is unchanged.\n\nWe now need to specify three things: A new shortcut trigger on 'Ctrl+W', a new keyboard input action sending Ctrl+F4, and a new condition that the active window is Qt Designer.\nQt Designer seems to always have title 'Qt Designer by Trolltech', so the condition will check for the active window having that title.
@@ -215,7 +215,7 @@ TriggersCount=1
 [Data_2_4Triggers0]
 Key=Ctrl+W
 Type=SHORTCUT
-Uuid={20ebe2c8-3dca-4f12-a769-2ab508dd62c9}
+Uuid={25e063bc-32e7-47af-8447-041c8346c8f1}
 
 [Data_2_5]
 Comment=By pressing Alt+Ctrl+W a D-Bus call will be performed that will show the minicli. You can use any kind of D-Bus call, just like using the command line 'qdbus' tool.
@@ -244,7 +244,7 @@ TriggersCount=1
 [Data_2_5Triggers0]
 Key=Ctrl+Alt+W
 Type=SHORTCUT
-Uuid={1b898e8b-89c3-4a5c-a994-2c58956eaf0d}
+Uuid={a7667f6d-e6df-425d-871b-bcbc59de749c}
 
 [Data_2_6]
 Comment=Read the comment on the "Type 'Hello'" action first.\n\nJust like the "Type 'Hello'" action, this one simulates keyboard input, specifically, after pressing Ctrl+Alt+B, it sends B to XMMS (B in XMMS jumps to the next song). The 'Send to specific window' checkbox is checked and a window with its class containing 'XMMS_Player' is specified; this will make the input always be sent to this window. This way, you can control XMMS even if, for instance, it is on a different virtual desktop.\n\n(Run 'xprop' and click on the XMMS window and search for WM_CLASS to see 'XMMS_Player').
@@ -286,7 +286,7 @@ TriggersCount=1
 [Data_2_6Triggers0]
 Key=Ctrl+Alt+B
 Type=SHORTCUT
-Uuid={e8198072-922f-4c3a-a582-d518c0ab6fdc}
+Uuid={b14a62de-495e-49a5-aa98-e26294bf575c}
 
 [Data_2_7]
 Comment=Konqueror in KDE3.1 has tabs, and now you can also have gestures.\n\nJust press the middle mouse button and start drawing one of the gestures, and after you are finished, release the mouse button. If you only need to paste the selection, it still works, just click the middle mouse button. (You can change the mouse button to use in the global settings).\n\nRight now, there are the following gestures available:\nmove right and back left - Forward (Alt+Right)\nmove left and back right - Back (Alt+Left)\nmove up and back down  - Up (Alt+Up)\ncircle counterclockwise - Reload (F5)\n\nThe gesture shapes can be entered by performing them in the configuration dialog. You can also look at your numeric pad to help you: gestures are recognized like a 3x3 grid of fields, numbered 1 to 9.\n\nNote that you must perform exactly the gesture to trigger the action. Because of this, it is possible to enter more gestures for the action. You should try to avoid complicated gestures where you change the direction of mouse movement more than once.  For instance, 45654 or 74123 are simple to perform, but 1236987 may be already quite difficult.\n\nThe conditions for all gestures are defined in this group. All these gestures are active only if the active window is Konqueror (class contains 'konqueror').
@@ -478,7 +478,7 @@ TriggersCount=1
 [Data_2_8Triggers0]
 Key=Meta+E
 Type=SHORTCUT
-Uuid={62c2d198-f264-446b-a99f-73f10e291e5c}
+Uuid={b92ee57a-a2d6-47ff-9f8b-c0323b0516b0}
 
 [Data_3]
 Comment=Basic Konqueror gestures.

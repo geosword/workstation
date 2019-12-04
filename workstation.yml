@@ -51,6 +51,9 @@
     - name: Synchronise the package databases
       command: /usr/bin/pacman -Syy
 
+    - name: Refresh the pacman-keys
+      command: /usr/bin/pacman-key --refresh-keys
+
     - name: "uncomment colors"
       lineinfile:
         dest: /etc/pacman.conf
@@ -70,8 +73,8 @@
 # THERES more STUFF TO DO FOR SETTING UP BLUETOOTH. check the archlinux bluetooth page for details
         - bluez
         - bluez-utils
-        - dolphin
         - efibootmgr
+        - dolphin
 # fakeroot is needed for makepkg which is needed to install google-chrome.
         - fakeroot
         - firefox
@@ -277,11 +280,6 @@
       tags:
         - sddmconfig
 
-    - name: enable & start sddm
-      systemd:
-        state: started
-        name: sddm.service
-        enabled: true
 
 # Some stuff for when we are testing with vagrant
     - name: Include virtualbox operations if we are in virtualbox
@@ -289,6 +287,11 @@
       when: 
         - ansible_virtualization_type == 'virtualbox'
 
+    - name: enable & start sddm
+      systemd:
+        state: started
+        name: sddm.service
+        enabled: true
 # this just checks out the repo, you still need to cd to it and run makepkg -s
     - name: clone google-chrome repo
       git:

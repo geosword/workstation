@@ -17,7 +17,12 @@
         owner: "dylanh"
       become: true
       become_user: dylanh
-      with_items: ["development"]
+      with_items: 
+        - development
+        - Documents
+        - Downloads
+        - Pictures
+        - temp
       tags:
         - createfolders
 
@@ -44,26 +49,75 @@
         - "files/stage/{{ inventory_hostname}}"
         - "files/stage/{{ inventory_hostname}}/.config"
 
+    - name: stop sddm if its running
+      systemd:
+        state: stopped
+        name: sddm.service
 
-# By this point we should have "stock" plasma files in /home/dylanh/.config because of the auto login configuration on sddm, so pull those files down
-    - name: fetch plasma stock configs
+    - name: kill all dylanh processes
+      command: killall -4 -u dylanh
+      ignore_errors: true
+
+    - name: mainly for testing, remove the userdir .config folder
+      file:
+        path: "{{ userdir }}/.config/"
+        state: absent
+      when: inventory_hostname == 'vbox'
+
+    - name: mainly for testing, create the userdir .config folder
+      file:
+        path: "{{ userdir }}/.config/"
+        state: directory
+        owner: dylanh
+        group: dylanh
+
+# By this point we should have "stock" plasma files in /home/dylanh/.config because of the auto login configuration on sddm
+    - name: get a list of any defaults we need to copy over
+      find:
+        path: files/defaults/files/dotconfig/
+        patterns: "*"
+      register: defaultconfigs
+      delegate_to: localhost
+
+
+    - name: copy the config overrides for things like the clock config, calc applet, and system tray settings
+      copy:
+        src: "{{ item.path }}"
+        dest: "{{ userdir }}/.config/{{ item.path | basename }}"
+      with_items:
+        - "{{ defaultconfigs.files }}"
+      tags:
+        - copydefaults
+
+# make sure sddm is running so we have a default config (the workstation playbook SHOULD have configured autologin for it)
+    - name:  start sddm to create the other config files that we dont have "defaults" for
+      systemd:
+        state: started
+        name: sddm.service
+
+    - name: wait for something like the plasma config to appear
+      wait_for:
+        path: "{{ userdir }}/.config/plasmashellrc"
+# Pull those and others from the workstation, to get (as close as possible) to a default configuration.
+
+    - name: find what files we need to inimerge
+      find:
+        path: files/defaults/merges/dotconfig/
+        patterns: "*"
+      register: inimerges
+      delegate_to: localhost
+
+    - name: fetch plasma configs we have inimerges for
       fetch: 
-        src: "{{ userdir }}/.config/{{ item }}"
+        src: "{{ userdir }}/.config/{{ item.path | basename }}"
         dest: "files/stock/"
       with_items:
-         - kdeglobals
-         - kglobalshortcutsrc
-         - khotkeysrc
+         - "{{ inimerges.files }}"
 
+# Then we do any ini merge oeprations
 # check the files/plasma folder for configs
     - name: All of this needs doing on local host, so we can copy the resulting plasma ini files to the target
       block:
-
-        - name: find plasma config files - The ones we just downloaded from the host
-          find:
-            path: "files/stock/{{ inventory_hostname }}/{{ userdir }}/.config/"
-            patterns: "*"
-          register: plasmaconfigs
 
         - name: we need the inimerger, so lets clone that repo locally
           git:
@@ -72,7 +126,7 @@
 
         - name: merge with any overrides
           command: "files/inimerger/inimerge.py -o files/stage/{{ inventory_hostname }}/.config/{{ item.path | basename }} {{ item.path }} files/defaults/.config/{{ item.path | basename }} files/{{ inventory_hostname }}/plasma/{{ item.path | basename }}"
-          with_items: "{{ plasmaconfigs.files }}"
+          with_items: "{{ inimerges.files }}"
 
       delegate_to: localhost
       tags: mergeinis
@@ -84,9 +138,10 @@
         owner: dylanh
         group: dylanh
         mode: '0600'
-      with_items: "{{ plasmaconfigs.files }}"
+      with_items: "{{ inimerges.files }}"
 
       # for testing, its cool to just to restart the session
+    - name: restart sddm if we're testing
       systemd:
         state: restarted
         name: sddm.service
@@ -104,13 +159,13 @@
       tags:
         - createuser
 
-      #    - name: install bashrc
-      #      copy:
-      #        dest: "{{ userdir }}/.bashrc"
-      #        src: files/bash/bashrc
-      #        owner: dylanh
-      #        mode: '0644'
-      #      tags:
-      #        - createuser
+    - name: install bashrc
+      copy:
+        dest: "{{ userdir }}/.bashrc"
+        src: files/bash/bashrc
+        owner: dylanh
+        mode: '0644'
+      tags:
+        - createuser
 
 

@@ -21,12 +21,6 @@
     - name: Set the X11 config file to something simple and default  (Virtualbox only)
       shell: "/usr/bin/Xorg :0 -configure"
       args:
-        creates: /etc/X11/xorg.conf
-      ignore_errors: True
-
-    - name: Set the X11 config file to something simple and default  (Virtualbox only)
-      shell: "/usr/bin/Xorg :0 -configure"
-      args:
         creates: /root/xorg.conf.new
 
     - name: copy the vanilla xorg.conf to the right place
