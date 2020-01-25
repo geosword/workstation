@@ -26,18 +26,23 @@
       tags:
         - createfolders
 
+    - name: switch.py for launching and switching hotness
+      git:
+        repo: "https://gitea.sectigo.net/dylanh/switchto.git"
+        dest: "{{ userdir }}/development/switchto"
+
     - name: make sure any old staging areas / repos are not there
       file:
         path: "{{ item }}"
         state: absent
       with_items:
-       - "files/stag/{{ inventory_hostname }}"
+       - "files/stage/{{ inventory_hostname }}"
        - files/inimerger
        - files/stock
       delegate_to: localhost
 
 # files/stock is config copied FROM a workstation
-# files/stage is config processed by the playbook and ready to copy to the workstation
+# files/stage is config processed by the playbook and ready TO copy to the workstation
     - name: make sure local work folders exist
       file:
         path: "{{ item }}"
@@ -46,8 +51,8 @@
       with_items:
         - files/stock
         - files/stage
-        - "files/stage/{{ inventory_hostname}}"
-        - "files/stage/{{ inventory_hostname}}/.config"
+        - "files/stage/{{ inventory_hostname }}"
+        - "files/stage/{{ inventory_hostname }}/.config"
 
     - name: stop sddm if its running
       systemd:
@@ -71,14 +76,15 @@
         owner: dylanh
         group: dylanh
 
-# By this point we should have "stock" plasma files in /home/dylanh/.config because of the auto login configuration on sddm
+# KDE Config process:
+# SDDM is set to autologin, which generates "stock" kde config files. These are copied into stock
+#
     - name: get a list of any defaults we need to copy over
       find:
         path: files/defaults/files/dotconfig/
         patterns: "*"
       register: defaultconfigs
       delegate_to: localhost
-
 
     - name: copy the config overrides for things like the clock config, calc applet, and system tray settings
       copy:
@@ -95,6 +101,7 @@
         state: started
         name: sddm.service
 
+# By this point we should have "stock" plasma files in /home/dylanh/.config because of the auto login configuration on sddm
     - name: wait for something like the plasma config to appear
       wait_for:
         path: "{{ userdir }}/.config/plasmashellrc"
@@ -125,7 +132,11 @@
             dest: files/inimerger
 
         - name: merge with any overrides
-          command: "files/inimerger/inimerge.py -o files/stage/{{ inventory_hostname }}/.config/{{ item.path | basename }} {{ item.path }} files/defaults/.config/{{ item.path | basename }} files/{{ inventory_hostname }}/plasma/{{ item.path | basename }}"
+          # So this is OUTPUTTING to files/stage/host_name/.config/somefile the merge of the following files (in this order: in all cases assuming it exists:)
+          # the stock file from the host's virgin install
+          # the corresponding file from files/defaults/merges/dotconfig/
+          # the corresponding file from files/host_name/merges/dotconfig/
+          command: "files/inimerger/inimerge.py -o files/stage/{{ inventory_hostname }}/.config/{{ item.path | basename }} files/stock/{{ inventory_hostname }}/home/dylanh/.config/{{ item.path | basename }} {{ item.path }} files/{{ inventory_hostname }}/merges/dotconfig/{{ item.path | basename }}"
           with_items: "{{ inimerges.files }}"
 
       delegate_to: localhost
