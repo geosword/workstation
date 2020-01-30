@@ -908,7 +908,7 @@ ActionsCount=1
 [Data_4_1Actions0]
 Arguments[$d]
 Call[$d]
-CommandURL=/home/dylanh/development/switchto/switchto.py -c dolphin.dolphin -e "/usr/bin/dolphin /home/dylanh/Downloads"
+CommandURL=/home/dylanh/tools/switchto/switchto.py -c dolphin.dolphin -e "/usr/bin/dolphin /home/dylanh/Downloads"
 RemoteApp[$d]
 RemoteObj[$d]
 Type=COMMAND_URL
@@ -938,7 +938,7 @@ ActionsCount=1
 [Data_4_2Actions0]
 Arguments[$d]
 Call[$d]
-CommandURL=/home/dylanh/development/switchto/switchto.py -c konsole.konsole -e /usr/bin/konsole
+CommandURL=/home/dylanh/tools/switchto/switchto.py -c konsole.konsole -e /usr/bin/konsole
 RemoteApp[$d]
 RemoteObj[$d]
 Type=COMMAND_URL
@@ -968,7 +968,7 @@ ActionsCount=1
 [Data_4_3Actions0]
 Arguments[$d]
 Call[$d]
-CommandURL=/home/dylanh/development/switchto/switchto.py -c google-chrome.Google-chrome -e /opt/google/chrome/chrome
+CommandURL=/home/dylanh/tools/switchto/switchto.py -c google-chrome.Google-chrome -e /opt/google/chrome/chrome
 RemoteApp[$d]
 RemoteObj[$d]
 Type=COMMAND_URL
@@ -998,7 +998,7 @@ ActionsCount=1
 [Data_4_4Actions0]
 Arguments[$d]
 Call[$d]
-CommandURL=/home/dylanh/development/switchto/switchto.py -c keepassxc.KeePassXC -e /usr/bin/keepassxc
+CommandURL=/home/dylanh/tools/switchto/switchto.py -c keepassxc.KeePassXC -e /usr/bin/keepassxc
 RemoteApp[$d]
 RemoteObj[$d]
 Type=COMMAND_URL
@@ -1026,7 +1026,7 @@ Type=SIMPLE_ACTION_DATA
 ActionsCount=1
 
 [Data_4_5Actions0]
-CommandURL=/home/dylanh/development/switchto/switchto.py -c riot.riot -e /opt/Riot/riot-web
+CommandURL=/home/dylanh/tools/switchto/switchto.py -c riot.riot -e /opt/Riot/riot-web
 Type=COMMAND_URL
 
 [Data_4_5Conditions]
@@ -1104,7 +1104,7 @@ Type=SIMPLE_ACTION_DATA
 ActionsCount=1
 
 [Data_4_8Actions0]
-CommandURL=/home/dylanh/development/switchto/switchto.py -c sublime_text.Sublime_text -e /opt/sublime_text/sublime_text
+CommandURL=/home/dylanh/tools/switchto/switchto.py -c sublime_text.Sublime_text -e /opt/sublime_text/sublime_text
 Type=COMMAND_URL
 
 [Data_4_8Conditions]

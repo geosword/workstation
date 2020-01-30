@@ -10,7 +10,7 @@
   tasks:
     # This also protects us from accidentally running
     - name: check its a system rescue cd, if not, fail
-      shell: "/sbin/uname -a | grep sysresccd"
+      shell: "/usr/bin/uname -a | grep sysresccd"
     # NO YOU DONT NEED TO CHECK THE RETURN CODE BECAUSE GREP WOULD RETURN 1 and cause a failure
 
     - name: check that limit has been set and that its just one host
@@ -22,7 +22,11 @@
   #    - name: Wait for confirmation
   #      pause:
   #        prompt: "WARNING!!!! Im about to remove all paritions from {{ primaryDisk }} and repartition. Press a key if you are SURE this is correct"
-  #     
+  #
+
+    - name: helpfull message
+      debug:
+        msg: HEY!!!!!! IF THINGS GO SIDEWARDS OR JUST PLAIN DONT WORK, CHECK THE README IN THE TARBALL.. THEY CHANGE SHIT. (but dont always trust what the readme says)
 
     - name: check the efi vars exist, because none of this will work if we're not on an efi enabled system
       stat: path=/sys/firmware/efi/efivars
@@ -33,6 +37,11 @@
         msg: Did you boot with efi using an efi enabled system (you have to set this specifically in virtualbox)
       when: not efivars.stat.exists
 
+    - name: kill off gpg-agent that may be there if there were previous runs
+      command: killall -4 gpg-agent
+      ignore_errors: yes
+
+
     - name: unmount the root partition (just incase there have been previous runs)
       mount:
         path: "/mnt/{{ item }}"
@@ -40,9 +49,13 @@
       with_items:
         - dev
         - proc
+        - run
         - sys
         - efi
         - 
+
+#    - name: remove all partitions on the device
+#      command: "dd if=/dev/zero of={{ primaryDisk }} bs=512 count=1"
 
     - name: read the partitions on the disk
       parted: "device={{ primaryDisk }} unit=MiB"
@@ -90,11 +103,13 @@
     - name: format the EFI partition
       filesystem:
         fstype: vfat
+        force: yes
         dev: "{{ primaryDisk }}1"
 
     - name: format the root partition
       filesystem:
         fstype: ext4
+        force: yes
         dev: "{{ primaryDisk }}2"
 
     # mount will ensure the mount point exists
@@ -110,7 +125,7 @@
 
     # Using unaechive will NOT work because it will want to download to the temp folder in root again, and will fill up the root disk.
     # So we're going to use wget instead.
-    - name: Download the latest root image from the web
+    - name: Download the root image
       command: "wget -O /mnt/arch.tar.gz {{ imageName }}"
       args:
         warn: false
@@ -125,7 +140,7 @@
     - name: Set the timezone
       file:
         src: /mnt/usr/share/zoneinfo/Europe/London
-        dest: /etc/localtime
+        dest: /mnt/etc/localtime
         state: link
 
     - name: set the keymap
@@ -165,7 +180,7 @@
 
     - name: download pacman mirror list
       get_url:
-        url: "https://www.archlinux.org/mirrorlist/?country=GB&protocol=http&protocol=https&ip_version=4"
+        url: "https://www.archlinux.org/mirrorlist/?country=GB&country=DE&country=US&protocol=http&protocol=https&ip_version=4&use_mirror_status=on"
         dest: "/mnt/etc/pacman.d/mirrorlist"
 
     - name: "uncomment `#Server` in pacman mirror list"
@@ -177,18 +192,49 @@
   # now we need to chroot, and to do that we need to bind mount some stuff
   # yes we could use individual mount modules, but that would take ages
     - name: mount dev, sys and proc
-      shell: mount --bind /dev /mnt/dev && mount --bind /sys /mnt/sys && mount -t proc proc /mnt/proc
+      shell: mount --bind /dev /mnt/dev && mount --bind /sys /mnt/sys && mount --bind /run /mnt/run && mount -t proc proc /mnt/proc
       args:
         warn: false
 
-    - name: install grub within the chroot
-      shell: chroot /mnt/ /bin/bash -c "grub-install --removable --target=x86_64-efi --efi-directory=/efi --bootloader-id=GRUB"
+    - name: run pacman -Sy
+      shell: chroot /mnt/ /bin/bash -c "/usr/bin/pacman -Sy"
 
-    - name: Edit the grub defaults.
+    - name: run pacman-key --init
+      shell: chroot /mnt/ /bin/bash -c "/usr/bin/pacman-key --init"
+
+    - name: run pacman-key --populate archlinux
+      shell: chroot /mnt/ /bin/bash -c "/usr/bin/pacman-key --populate archlinux"
+
+    - name: install stuff that isnt already in the root image, because thats what root images are for... installing vital stuff that you need. Duh!
+      shell: chroot /mnt/ /bin/bash -c "/usr/bin/pacman -S --noconfirm base linux linux-firmware"
+
+    # Appears that grub-mkconfig uses sed to create the config. So sed is needed too 
+    - name: install grub binaries within the chroot
+      shell: chroot /mnt/ /bin/bash -c "/usr/bin/pacman -S --noconfirm grub sed efibootmgr"
+
+    - name: install the grub bootloader within the chroot
+      shell: chroot /mnt/ /bin/bash -c "grub-install --removable --target=x86_64-efi --efi-directory=efi --bootloader-id=GRUB"
+
+    - name: edit grub defaults - no predicable ifnames
       replace:
         dest: "/mnt/etc/default/grub"
-        regexp: '^GRUB_CMDLINE_LINUX_DEFAULT="quiet"'
-        replace: 'GRUB_CMDLINE_LINUX_DEFAULT="net.ifnames=0 biosdevname=0"'
+        regexp: '^GRUB_CMDLINE_LINUX=""'
+        replace: 'GRUB_CMDLINE_LINUX="net.ifnames=0 biosdevname=0"'
+      tags:
+        - editgrubdefaults
+
+    - name: edit grub defaults - no quiet
+      replace:
+        dest: "/mnt/etc/default/grub"
+        regexp: 'quiet'
+        replace: ''
+      tags:
+        - editgrubdefaults
+
+    - name: check the grub config looks vaugely correct. ifnames=0
+      shell: grep "ifnames=0" /mnt/etc/default/grub
+      tags:
+        - editgrubdefaults
 
     - name: create the grub config within the chroot
       shell: chroot /mnt/ /bin/bash -c "grub-mkconfig -o /boot/grub/grub.cfg"
@@ -202,6 +248,9 @@
         - systemd-networkd
         - systemd-resolved
         - sshd
+
+    - name: Create the fstab
+      shell: chroot /mnt/ /bin/bash -c "genfstab -U ./ >> /etc/fstab"
 
     - name: make sure the root .ssh folder exists
       file:
@@ -222,7 +271,16 @@
         content: "{{ inventory_hostname }}"
 
     # If you just want DHCP then dont create a network set_task task for it
-   
+
+    - name: set some network settings vbox2
+      set_fact:
+        net_ipaddr: 10.10.4.184/24
+        net_gw: 10.10.4.1
+        net_dns: 10.10.4.11
+        net_search: sysadminology.net
+      when:
+        - inventory_hostname =='vbox2'
+
     - name: set some network settings geosword
       set_fact:
         net_ipaddr: 10.10.4.100/24
@@ -263,6 +321,21 @@
       template:
         src: templates/network.network.j2
         dest: /mnt/etc/systemd/network/20-wired.network
+
+    - name: overrride folder for tty1 service
+      file:
+        path: /mnt/etc/systemd/system/getty@tty1.service.d
+        state: directory
+
+    - name: prevent the tty from clearing before the login prompt
+      copy:
+        dest: /mnt/etc/systemd/system/getty@tty1.service.d/override.conf
+        content: |
+          [Service]
+          TTYVTDisallocate=no
+
+
+
 
 #TODO we COULD instigate a reboot here - or make it part of a "super playbook", and let it handle the reboot, and associated wait for it to come backup
 # because you would need to add_host the host based on the ip set above.... hmmm...

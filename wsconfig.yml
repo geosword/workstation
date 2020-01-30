@@ -13,8 +13,8 @@
         path: "{{ userdir }}/{{ item }}"
         state: directory
         mode: "0755"
-        group: "dylanh"
-        owner: "dylanh"
+  #        group: "dylanh"
+  #        owner: "dylanh"
       become: true
       become_user: dylanh
       with_items: 
@@ -22,6 +22,7 @@
         - Documents
         - Downloads
         - Pictures
+        - tools
         - temp
       tags:
         - createfolders
@@ -29,7 +30,9 @@
     - name: switch.py for launching and switching hotness
       git:
         repo: "https://gitea.sectigo.net/dylanh/switchto.git"
-        dest: "{{ userdir }}/development/switchto"
+        dest: "{{ userdir }}/tools/switchto"
+      become: true
+      become_user: dylanh
 
     - name: make sure any old staging areas / repos are not there
       file:
@@ -178,5 +181,13 @@
         mode: '0644'
       tags:
         - createuser
+
+# zsh and oh my zsh configuration
+    - name: Cloning oh-my-zsh
+      git:
+        repo: https://github.com/ohmyzsh/ohmyzsh.git
+        dest: ~/.oh-my-zsh
+      become: yes
+      become_user: dylanh
 
 

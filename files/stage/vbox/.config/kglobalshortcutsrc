@@ -1,9 +1,7 @@
 [ActivityManager]
 _k_friendly_name=Activity Manager
-switch-to-activity-5d67eea6-e34d-4e4e-97f8-74232207422e=none,none,Switch to activity "Default"
 
 [KDE Keyboard Layout Switcher]
-Switch keyboard layout to English (US)=none,none,Switch keyboard layout to English (US)
 Switch to Next Keyboard Layout=Ctrl+Alt+K,none,Switch to Next Keyboard Layout
 _k_friendly_name=KDE Daemon
 
@@ -11,29 +9,9 @@ _k_friendly_name=KDE Daemon
 Toggle Screen Reader On and Off=Meta+Alt+S,Meta+Alt+S,Toggle Screen Reader On and Off
 _k_friendly_name=Accessibility
 
-[kcm_touchpad]
-Disable Touchpad=Touchpad Off,Touchpad Off,Disable Touchpad
-Enable Touchpad=Touchpad On,Touchpad On,Enable Touchpad
-Toggle Touchpad=Touchpad Toggle,Touchpad Toggle,Toggle Touchpad
-_k_friendly_name=KDE Daemon
-
 [kded5]
 Show System Activity=Ctrl+Esc,Ctrl+Esc,Show System Activity
-_k_friendly_name=KDE Daemon
-display=Display\tMeta+P,Display\tMeta+P,Switch Display
-
-[khotkeys]
-_k_friendly_name=KDE Daemon
-{1fe13104-bf5c-4bfd-9081-290512384fcb}=Alt+Shift+W,none,keepassx
-{37eaa32a-2202-4ba2-933c-0bd94e53a80c}=Alt+Shift+D,none,Launch Dolphin
-{43bc5701-690c-4a08-9c2f-36fe7908e1a7}=Alt+Shift+A,none,Konsole
-{605c4a67-f670-443d-b4bd-c99bd7a412d8}=Ctrl+Alt+T,none,Launch Konsole
-{6a89e23d-90ca-4684-91a2-06744c118a43}=Alt+Shift+Z,none,Sublime
-{6eecc3a3-c2d4-44a4-9fb4-b22b2d8a9e98}=Alt+Shift+X,none,Chrome
-{94db2bf0-0b0b-4da0-9251-7351156b7a65}=Alt+Shift+R,none,Riot
-{d03619b6-9b3c-48cc-9d9c-a2aadb485550}=,none,Search
-{e0d1e9da-1aa7-4b56-8dda-2432ab5acde5}=Alt+Shift+Ins,none,Paste selection anywhere
-{e27e92bc-66a6-4fb3-bf64-7825728ab900}=Alt+>,none,sleep monitor
+_k_friendly_name=org_kde_powerdevil
 
 [krunner.desktop]
 RunClipboard=Alt+Shift+F2,Alt+Shift+F2,Run command on clipboard contents
