@@ -1,0 +1,56 @@
+# https://wiki.archlinux.org/index.php/Zsh#Making_Zsh_your_default_shell
+# Path as an array
+typeset -U PATH path
+# path=("$HOME/.local/bin" /other/things/in/path "$path[@]")
+export PATH
+# Autocompletions
+zstyle ':completion:*' menu select
+setopt COMPLETE_ALIASES
+source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
+
+
+setopt histignorealldups sharehistory
+setopt interactivecomments
+# Use emacs keybindings even if our EDITOR is set to vi
+bindkey -e
+
+# Keep 1000 lines of history within the shell and save it to ~/.zsh_history:
+HISTSIZE=1000
+SAVEHIST=1000
+HISTFILE=~/.zsh_history
+
+# Use modern completion system
+autoload -Uz compinit
+compinit
+
+zstyle ':completion:*' auto-description 'specify: %d'
+zstyle ':completion:*' completer _expand _complete _correct _approximate
+zstyle ':completion:*' format 'Completing %d'
+zstyle ':completion:*' group-name ''
+eval "$(dircolors -b)"
+zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:*' list-colors ''
+zstyle ':completion:*' list-prompt %SAt %p: Hit TAB for more, or the character to insert%s
+zstyle ':completion:*' matcher-list '' 'm:{a-z}={A-Z}' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=* l:|=*'
+zstyle ':completion:*' menu select=long
+zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p%s
+zstyle ':completion:*' use-compctl false
+zstyle ':completion:*' verbose true
+
+zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
+zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
+
+# Automatically quote globs in URL and remote references
+__remote_commands=(scp rsync)
+autoload -U url-quote-magic
+zle -N self-insert url-quote-magic
+zstyle -e :urlglobber url-other-schema '[[ $__remote_commands[(i)$words[1]] -le ${#__remote_commands}  ]] && reply=("*") || reply=(http https ftp)'
+
+# allow ctrl arrow to navigate words
+# forward-word and backward-word are the same as zsh's ALT-b/f - but does NOT see . as a word boundary
+bindkey "^[[1;5C" forward-word
+bindkey "^[[1;5D" backward-word
+#
+# Powerlevel9k
+source /usr/share/zsh-theme-powerlevel9k/powerlevel9k.zsh-theme
+

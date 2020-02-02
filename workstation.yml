@@ -73,7 +73,6 @@
 # THERES more STUFF TO DO FOR SETTING UP BLUETOOTH. check the archlinux bluetooth page for details
         - bluez
         - bluez-utils
-        - efibootmgr
         - dolphin
 # fakeroot is needed for makepkg which is needed to install google-chrome.
         - fakeroot
@@ -109,6 +108,7 @@
         - xorg
         - xorg-xinit
         - zsh
+        - zsh-theme-powerlevel9k
       ignore_errors: true
       tags: packages
 
@@ -162,9 +162,12 @@
         shell: /usr/bin/zsh
 # lp group allows bluetooth access, wheel allows root access to things
         groups: wheel,dylanh,lp
+        # the password is test123
+        password: "$6$8TfIqE.dd/0iUF1Q$txKOLAfCAfofs8OCljKEtXFoXJjZamLsMVe/0EVy5yvr3z2USWsrG2wRwC0c4ARWsZ4ckFPcrEcl/fp9aSn4J/"
         home: "{{ userdir }}"
       tags:
         - createuser
+
 
     - name: create the .ssh folder
       file:
@@ -270,17 +273,6 @@
       tags:
         - sddmconfig
 
-    - name: create autologin.conf
-      copy:
-        dest: /etc/sddm.conf.d/autologin.conf
-        content: |
-          [Autologin]
-          Relogin=false
-          Session=plasma.desktop
-          User=dylanh
-      tags:
-        - sddmconfig
-
 
 # Some stuff for when we are testing with vagrant
     - name: Include virtualbox operations if we are in virtualbox
@@ -340,3 +332,6 @@
       tags:
         - installchrome
 
+    - name: message
+      debug:
+        msg: "DO THIS NOW. Set passwords for both dylanh and root to something more secure than test123!!!! ********* Do it!!!! get to tha choppppaaaaaaahhhh!"

@@ -250,13 +250,19 @@
         - sshd
 
     - name: Create the fstab
-      shell: chroot /mnt/ /bin/bash -c "genfstab -U ./ >> /etc/fstab"
+      shell: chroot /mnt/ /bin/bash -c "genfstab -U ./ > /etc/fstab"
 
     - name: make sure the root .ssh folder exists
       file:
         path: /mnt/root/.ssh
         state: directory
         mode: u=rwx,g-rwx,o-rwx
+
+    - name: set the root password
+      user:
+        name: root
+        # the password is test123
+        password: "$6$8TfIqE.dd/0iUF1Q$txKOLAfCAfofs8OCljKEtXFoXJjZamLsMVe/0EVy5yvr3z2USWsrG2wRwC0c4ARWsZ4ckFPcrEcl/fp9aSn4J/"
 
     - name: add your public key to the root user to allow later easy sshing
       copy:
@@ -272,14 +278,14 @@
 
     # If you just want DHCP then dont create a network set_task task for it
 
-    - name: set some network settings vbox2
+    - name: set some network settings vbox
       set_fact:
-        net_ipaddr: 10.10.4.184/24
+        net_ipaddr: 10.10.4.122/24
         net_gw: 10.10.4.1
         net_dns: 10.10.4.11
         net_search: sysadminology.net
       when:
-        - inventory_hostname =='vbox2'
+        - inventory_hostname =='vbox'
 
     - name: set some network settings geosword
       set_fact:
@@ -327,6 +333,15 @@
         path: /mnt/etc/systemd/system/getty@tty1.service.d
         state: directory
 
+    - name: prevent the nouveau display module from loading, if we're on redeye or geosword
+      copy:
+        dest: /etc/modprobe.d/block_nouveau.conf
+        content: |
+          # The below actually black lists this module and its dependents
+          install nouveau /bin/true
+      when:
+        - (inventory_hostname == 'redeye' or inventory_hostname == 'geosword')
+
     - name: prevent the tty from clearing before the login prompt
       copy:
         dest: /mnt/etc/systemd/system/getty@tty1.service.d/override.conf
@@ -334,8 +349,22 @@
           [Service]
           TTYVTDisallocate=no
 
+    - name: attempt to set the efi boot order to boot from the HD first, so we can reboot it into the new system, ready for the following stages.
+      shell: chroot /mnt/ /bin/bash -c "efibootmgr -o 1,0,2"
+      ignore_errors: true
 
+    - name: remove sshkeys from the localhost, because they will have changed
+      shell: "ssh-keygen -f /home/dylanh/.ssh/known_hosts -R {{ item }}"
+      with_items:
+        - "{{ net_ipaddr | regex_replace('/24') }}"
+        - "{{ inventory_hostname }}"
+      delegate_to: localhost
+      delegate_facts: true
+      ignore_errors: true
 
+    - name: message
+      debug:
+        msg: "If the attempt to run efibootmgr above worked, You can reboot the target host now if you like. It should boot up into your new arch linux install!!"
 
 #TODO we COULD instigate a reboot here - or make it part of a "super playbook", and let it handle the reboot, and associated wait for it to come backup
 # because you would need to add_host the host based on the ip set above.... hmmm...

@@ -57,27 +57,52 @@
         - "files/stage/{{ inventory_hostname }}"
         - "files/stage/{{ inventory_hostname }}/.config"
 
+    - name: check for something resembling an existing KDE config
+      stat:
+        path: "{{ userdir }}/.config/dhansibleconfig"
+      register: configuredbefore
+
     - name: stop sddm if its running
       systemd:
         state: stopped
         name: sddm.service
+      when: configuredbefore.stat.exists == true
 
-    - name: kill all dylanh processes
-      command: killall -4 -u dylanh
-      ignore_errors: true
+# Start of testing block
+    - name: Only do this stuff if we're on a test vm
+      block:
 
-    - name: mainly for testing, remove the userdir .config folder
-      file:
-        path: "{{ userdir }}/.config/"
-        state: absent
+      - name: kill all dylanh processes
+        command: killall -4 -u dylanh
+        ignore_errors: true
+
+      - name: mainly for testing, remove the userdir .config folder
+        file:
+          path: "{{ userdir }}/.config/"
+          state: absent
+
+      - name: mainly for testing, create the userdir .config folder
+        file:
+          path: "{{ userdir }}/.config/"
+          state: directory
+          owner: dylanh
+          group: dylanh
+
       when: inventory_hostname == 'vbox'
+# END of testing block
 
-    - name: mainly for testing, create the userdir .config folder
-      file:
-        path: "{{ userdir }}/.config/"
-        state: directory
-        owner: dylanh
-        group: dylanh
+# enable auto login, but only if it looks like we havent been configured by this ansible play before
+    - name: create autologin.conf
+      copy:
+        dest: /etc/sddm.conf.d/autologin.conf
+        content: |
+          [Autologin]
+          Relogin=false
+          Session=plasma.desktop
+          User=dylanh
+      tags:
+        - sddmconfig
+      when: configuredbefore.stat.exists == false
 
 # KDE Config process:
 # SDDM is set to autologin, which generates "stock" kde config files. These are copied into stock
@@ -103,11 +128,13 @@
       systemd:
         state: started
         name: sddm.service
+      when: configuredbefore.stat.exists == true
 
 # By this point we should have "stock" plasma files in /home/dylanh/.config because of the auto login configuration on sddm
     - name: wait for something like the plasma config to appear
       wait_for:
         path: "{{ userdir }}/.config/plasmashellrc"
+      when: configuredbefore.stat.exists == true
 # Pull those and others from the workstation, to get (as close as possible) to a default configuration.
 
     - name: find what files we need to inimerge
@@ -154,6 +181,16 @@
         mode: '0600'
       with_items: "{{ inimerges.files }}"
 
+    - name: touch a file so we know if we've boot strapped this config before
+      file:
+        path: "{{ userdir }}/.config/dhansibleconfig"
+        state: touch
+
+    - name: remove the autologin config now we're done with it
+      file:
+        path: /etc/sddm.conf.d/autologin.conf
+        state: absent
+
       # for testing, its cool to just to restart the session
     - name: restart sddm if we're testing
       systemd:
@@ -183,6 +220,16 @@
         - createuser
 
 # zsh and oh my zsh configuration
+
+    - name: install zshrc
+      copy:
+        dest: "{{ userdir }}/.zshrc"
+        src: files/zsh/zshrc
+        owner: dylanh
+        mode: '0644'
+      tags:
+        - createuser
+
     - name: Cloning oh-my-zsh
       git:
         repo: https://github.com/ohmyzsh/ohmyzsh.git
@@ -190,4 +237,16 @@
       become: yes
       become_user: dylanh
 
+    - name: Cloning auto suggestion
+      git:
+        repo: https://github.com/zsh-users/zsh-autosuggestions
+        dest: ~/.zsh/zsh-autosuggestions
+      become: yes
+      become_user: dylanh
 
+# https://www.reddit.com/r/kde/comments/6u0wo7/configuring_kde_by_editing_the_config_files/
+# https://bugs.kde.org/show_bug.cgi?id=300532
+# Adopt ~/.config/kglobalshortcutsrc to your needs
+# Save
+# Force kglobalaccel (apparently, responsible for the global shortcuts) to quit and restart: kquitapp kglobalaccel && sleep 2s && kglobalaccel5&
+# The above seems to work for me, also without restart. Note that you probably need to replace kquitapp with kquitapp5. So writing the ~/.config files may be a solution
