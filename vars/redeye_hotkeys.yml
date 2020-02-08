@@ -1,0 +1,4 @@
+hotkeys:
+  - "kglobalshortcutsrc|kwin|Window to Screen 0|Meta+Shift+Ins,none,Window to Screen 0"
+  - "kglobalshortcutsrc|kwin|Window to Screen 1|Meta+Shift+Home,none,Window to Screen 1"
+  - "kglobalshortcutsrc|kwin|Window to Screen 2|Meta+Shift+PgUp,none,Window to Screen 2"

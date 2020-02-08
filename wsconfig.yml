@@ -1,6 +1,14 @@
 # The idea of this playbook is that it maintains the configuration of the workstation, rather than boot strapping it
 # Currently it handles three specific files of plasma, but could also manage tmux, vim or anything else we can resonably control
 # with config files
+
+
+#
+# POSSIBLE useful util
+# kwriteconfig5 --file "klaunchrc" --group "BusyCursorSettings" --key "Bouncing" false
+#
+#
+
 - hosts: all
   tasks:
     - name: include some global variables
@@ -13,8 +21,6 @@
         path: "{{ userdir }}/{{ item }}"
         state: directory
         mode: "0755"
-  #        group: "dylanh"
-  #        owner: "dylanh"
       become: true
       become_user: dylanh
       with_items: 
@@ -33,170 +39,6 @@
         dest: "{{ userdir }}/tools/switchto"
       become: true
       become_user: dylanh
-
-    - name: make sure any old staging areas / repos are not there
-      file:
-        path: "{{ item }}"
-        state: absent
-      with_items:
-       - "files/stage/{{ inventory_hostname }}"
-       - files/inimerger
-       - files/stock
-      delegate_to: localhost
-
-# files/stock is config copied FROM a workstation
-# files/stage is config processed by the playbook and ready TO copy to the workstation
-    - name: make sure local work folders exist
-      file:
-        path: "{{ item }}"
-        state: directory
-      delegate_to: localhost
-      with_items:
-        - files/stock
-        - files/stage
-        - "files/stage/{{ inventory_hostname }}"
-        - "files/stage/{{ inventory_hostname }}/.config"
-
-    - name: check for something resembling an existing KDE config
-      stat:
-        path: "{{ userdir }}/.config/dhansibleconfig"
-      register: configuredbefore
-
-    - name: stop sddm if its running
-      systemd:
-        state: stopped
-        name: sddm.service
-      when: configuredbefore.stat.exists == true
-
-# Start of testing block
-    - name: Only do this stuff if we're on a test vm
-      block:
-
-      - name: kill all dylanh processes
-        command: killall -4 -u dylanh
-        ignore_errors: true
-
-      - name: mainly for testing, remove the userdir .config folder
-        file:
-          path: "{{ userdir }}/.config/"
-          state: absent
-
-      - name: mainly for testing, create the userdir .config folder
-        file:
-          path: "{{ userdir }}/.config/"
-          state: directory
-          owner: dylanh
-          group: dylanh
-
-      when: inventory_hostname == 'vbox'
-# END of testing block
-
-# enable auto login, but only if it looks like we havent been configured by this ansible play before
-    - name: create autologin.conf
-      copy:
-        dest: /etc/sddm.conf.d/autologin.conf
-        content: |
-          [Autologin]
-          Relogin=false
-          Session=plasma.desktop
-          User=dylanh
-      tags:
-        - sddmconfig
-      when: configuredbefore.stat.exists == false
-
-# KDE Config process:
-# SDDM is set to autologin, which generates "stock" kde config files. These are copied into stock
-#
-    - name: get a list of any defaults we need to copy over
-      find:
-        path: files/defaults/files/dotconfig/
-        patterns: "*"
-      register: defaultconfigs
-      delegate_to: localhost
-
-    - name: copy the config overrides for things like the clock config, calc applet, and system tray settings
-      copy:
-        src: "{{ item.path }}"
-        dest: "{{ userdir }}/.config/{{ item.path | basename }}"
-      with_items:
-        - "{{ defaultconfigs.files }}"
-      tags:
-        - copydefaults
-
-# make sure sddm is running so we have a default config (the workstation playbook SHOULD have configured autologin for it)
-    - name:  start sddm to create the other config files that we dont have "defaults" for
-      systemd:
-        state: started
-        name: sddm.service
-      when: configuredbefore.stat.exists == true
-
-# By this point we should have "stock" plasma files in /home/dylanh/.config because of the auto login configuration on sddm
-    - name: wait for something like the plasma config to appear
-      wait_for:
-        path: "{{ userdir }}/.config/plasmashellrc"
-      when: configuredbefore.stat.exists == true
-# Pull those and others from the workstation, to get (as close as possible) to a default configuration.
-
-    - name: find what files we need to inimerge
-      find:
-        path: files/defaults/merges/dotconfig/
-        patterns: "*"
-      register: inimerges
-      delegate_to: localhost
-
-    - name: fetch plasma configs we have inimerges for
-      fetch: 
-        src: "{{ userdir }}/.config/{{ item.path | basename }}"
-        dest: "files/stock/"
-      with_items:
-         - "{{ inimerges.files }}"
-
-# Then we do any ini merge oeprations
-# check the files/plasma folder for configs
-    - name: All of this needs doing on local host, so we can copy the resulting plasma ini files to the target
-      block:
-
-        - name: we need the inimerger, so lets clone that repo locally
-          git:
-            repo: 'https://gitea.sectigo.net/dylanh/inimerger.git'
-            dest: files/inimerger
-
-        - name: merge with any overrides
-          # So this is OUTPUTTING to files/stage/host_name/.config/somefile the merge of the following files (in this order: in all cases assuming it exists:)
-          # the stock file from the host's virgin install
-          # the corresponding file from files/defaults/merges/dotconfig/
-          # the corresponding file from files/host_name/merges/dotconfig/
-          command: "files/inimerger/inimerge.py -o files/stage/{{ inventory_hostname }}/.config/{{ item.path | basename }} files/stock/{{ inventory_hostname }}/home/dylanh/.config/{{ item.path | basename }} {{ item.path }} files/{{ inventory_hostname }}/merges/dotconfig/{{ item.path | basename }}"
-          with_items: "{{ inimerges.files }}"
-
-      delegate_to: localhost
-      tags: mergeinis
-
-    - name: now copy the resulting files to the .config folder.
-      copy:
-        src: "files/stage/{{ inventory_hostname }}/.config/{{ item.path | basename }}"
-        dest: "{{ userdir }}/.config/{{ item.path | basename }}"
-        owner: dylanh
-        group: dylanh
-        mode: '0600'
-      with_items: "{{ inimerges.files }}"
-
-    - name: touch a file so we know if we've boot strapped this config before
-      file:
-        path: "{{ userdir }}/.config/dhansibleconfig"
-        state: touch
-
-    - name: remove the autologin config now we're done with it
-      file:
-        path: /etc/sddm.conf.d/autologin.conf
-        state: absent
-
-      # for testing, its cool to just to restart the session
-    - name: restart sddm if we're testing
-      systemd:
-        state: restarted
-        name: sddm.service
-      when: inventory_hostname == 'vbox'
 
 # bash configuration
     - name: install bash_profile
@@ -227,6 +69,8 @@
         src: files/zsh/zshrc
         owner: dylanh
         mode: '0644'
+      become: yes
+      become_user: dylanh
       tags:
         - createuser
 
@@ -250,3 +94,59 @@
 # Save
 # Force kglobalaccel (apparently, responsible for the global shortcuts) to quit and restart: kquitapp kglobalaccel && sleep 2s && kglobalaccel5&
 # The above seems to work for me, also without restart. Note that you probably need to replace kquitapp with kquitapp5. So writing the ~/.config files may be a solution
+
+# KDE configuration
+# Copy in the config for the task bar to set it up how we want it. We MAY be able to do this with kwriteconfig5, but for now we'll just copy the file in
+#
+# THIS will get a task switcher setting change noticed, but wont do anything keyboard related.
+# We can assign the reloading of kglobalaccel5 to a hotkey, but everything else should need a log out / login if thats whats needed. 
+# kwin_x11 --replace & 
+# kquitapp5 kglobalaccel && sleep 2s && kglobalaccel5 &
+#
+    - name: "Copy in custom plasma files"
+      copy:
+        src: "./files/defaults/files/dotconfig/{{ item }}"
+        dest: "{{ userdir }}/.config/"
+      with_items:
+# custom shortcuts
+        - khotkeysrc
+# "task bar" config
+        - plasma-org.kde.plasma.desktop-appletsrc
+# Keyboard layout in plasma
+        - kcminputrc
+        - kxkbrc
+# initially for to make the task switcher "grid" but looks like it could be used to set compositing too
+        - kwinrc
+      become: yes
+      become_user: dylanh
+
+    - name: include default hotkey vars
+      include_vars:
+        file: default_hotkeys.yml
+
+    - name: check for host specific hotkeys
+      find:
+        path: "./vars/{{ inventory_hostname }}_hotkeys.yml"
+      register: hosthotkeys
+
+    - name: include default hotkey vars
+      include_vars:
+        file: "{{ inventory_hostname }}_hotkeys.yml"
+      when:
+        - hosthotkeys.matched > 0
+
+    - name: Set the default hotkeys for all hosts
+      command: "/usr/bin/kwriteconfig5 --file {{ item.split('|')[0] }} --group '{{ item.split('|')[1] }}' --key '{{ item.split('|')[2] }}' '{{ item.split('|')[3] }}'"
+      with_items:
+        - "{{ defaulthotkeys }}"
+      become: true
+      become_user: dylanh
+
+    - name: Set the host specific hotkeys
+      command: "/usr/bin/kwriteconfig5 --file {{ item.split('|')[0] }} --group '{{ item.split('|')[1] }}' --key '{{ item.split('|')[2] }}' '{{ item.split('|')[3] }}'"
+      with_items:
+        - "{{ hotkeys }}"
+      become: true
+      become_user: dylanh
+      when:
+        - hosthotkeys.matched > 0

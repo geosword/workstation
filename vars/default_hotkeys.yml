@@ -1,0 +1,5 @@
+defaulthotkeys:
+  - "kglobalshortcutsrc|kwin|Window Quick Tile Left|Meta+Left,none,Quick Tile Window to the Left"
+  - "kglobalshortcutsrc|kwin|Window Quick Tile Right|Meta+Right,none,Quick Tile Window to the Right"
+  - "kglobalshortcutsrc|kwin|Window Maximize|Meta+Up,none,Maximise Window"
+  - "kglobalshortcutsrc|kwin|Window Close|Alt+Q,none,Close Window"

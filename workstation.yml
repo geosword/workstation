@@ -25,16 +25,6 @@
       with_items:
         - vars/main.yml
 
-    - name: make sure any old staging areas / repos are not there
-      file:
-        path: "{{ item }}"
-        state: absent
-      with_items:
-       - "files/stag/{{ ansible_hostname }}"
-       - files/inimerger
-       - files/stock
-      delegate_to: localhost
-
 # update the mirrors list
     - name: download pacman mirror list
       get_url:
@@ -107,6 +97,8 @@
         - xdotool
         - xorg
         - xorg-xinit
+# zathura is a minimal pdf viewer with vim keybindings. https://wiki.archlinux.org/index.php/Zathura
+        - zathura
         - zsh
         - zsh-theme-powerlevel9k
       ignore_errors: true

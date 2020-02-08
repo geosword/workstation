@@ -5,7 +5,7 @@ update_info=kwin.upd:replace-scalein-with-scale,kwin.upd:port-minimizeanimation-
 OpenGLIsUnsafe=false
 
 [Desktops]
-Id_1=0fcbfc97-70b2-478b-ba5b-c3a780b7a06e
+Id_1=9c818a85-4fd7-4cc8-8f77-1172f8a752b3
 Number=1
 Rows=1
 
@@ -17,27 +17,8 @@ TabBoxAlternative=false
 TabBox=false
 TabBoxAlternative=false
 
-[MouseBindings]
-CommandActiveTitlebar1=Raise
-CommandActiveTitlebar2=Nothing
-CommandActiveTitlebar3=Operations menu
-CommandAll1=Move
-CommandAll2=Toggle raise and lower
-CommandAll3=Resize
-CommandAllKey=Alt
-CommandAllWheel=Nothing
-CommandInactiveTitlebar1=Activate and raise
-CommandInactiveTitlebar2=Nothing
-CommandInactiveTitlebar3=Operations menu
-CommandTitlebarWheel=Nothing
-CommandWindow1=Activate, raise and pass click
-CommandWindow2=Activate and pass click
-CommandWindow3=Activate and pass click
-CommandWindowWheel=Scroll
-
 [Plugins]
 highlightwindowEnabled=true
-windowgeometryEnabled=false
 
 [TabBox]
 ActivitiesMode=1
@@ -56,33 +37,9 @@ ActivitiesMode=1
 ApplicationsMode=0
 DesktopMode=1
 HighlightWindows=true
-LayoutName=present_windows
+LayoutName=org.kde.breeze.desktop
 MinimizedMode=0
 MultiScreenMode=0
 ShowDesktopMode=0
 ShowTabBox=true
 SwitchingMode=0
-
-[Windows]
-ActiveMouseScreen=false
-AutoRaise=false
-AutoRaiseInterval=0
-BorderSnapZone=10
-CenterSnapZone=0
-ClickRaise=true
-DelayFocusInterval=0
-FocusPolicy=ClickToFocus
-FocusStealingPreventionLevel=1
-GeometryTip=false
-HideUtilityWindowsForInactive=true
-MaximizeButtonLeftClickCommand=Maximize
-MaximizeButtonMiddleClickCommand=Maximize (vertical only)
-MaximizeButtonRightClickCommand=Maximize (horizontal only)
-NextFocusPrefersMouse=false
-Placement=UnderMouse
-SeparateScreenFocus=false
-ShadeHover=false
-ShadeHoverInterval=250
-SnapOnlyWhenOverlapping=false
-TitlebarDoubleClickCommand=Maximize
-WindowSnapZone=10
