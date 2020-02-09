@@ -1,0 +1,3 @@
+hotkeys:
+  - "kglobalshortcutsrc|ksmserver|Halt Without Confirmation|none,none,Halt Without Confirmation"
+  - "kglobalshortcutsrc|ksmserver|Reboot Without Confirmation|none,none,Reboot Without Confirmation"

@@ -19,10 +19,9 @@
       when:
         - "ansible_play_hosts | length >1"
 
-  #    - name: Wait for confirmation
-  #      pause:
-  #        prompt: "WARNING!!!! Im about to remove all paritions from {{ primaryDisk }} and repartition. Press a key if you are SURE this is correct"
-  #
+    - name: Wait for confirmation
+      pause:
+        prompt: "WARNING!!!! Im about to remove all paritions from {{ primaryDisk }} and repartition. Press a key if you are SURE this is correct"
 
     - name: helpfull message
       debug:

@@ -3,12 +3,6 @@
 # with config files
 
 
-#
-# POSSIBLE useful util
-# kwriteconfig5 --file "klaunchrc" --group "BusyCursorSettings" --key "Bouncing" false
-#
-#
-
 - hosts: all
   tasks:
     - name: include some global variables
@@ -30,6 +24,7 @@
         - Pictures
         - tools
         - temp
+        - .ssh
       tags:
         - createfolders
 
@@ -47,13 +42,46 @@
       become: true
       become_user: dylanh
 
+    - name: If we have a public key, lets add that to authorized keys, on the basis its OUR public key
+      copy:
+        src: "{{ userdir }}/.ssh/id_rsa.pub"
+        dest: "{{ userdir }}/.ssh/authorized_keys"
+        remote_src: true
+      ignore_errors: true
+      become: true
+      become_user: dylanh
+
+    - name: ansible-workstation for all of this
+      git:
+        repo: "https://gitea.sectigo.net/dylanh/workstation-ansible.git"
+        dest: "{{ userdir }}/development/workstation-ansible"
+      become: true
+      become_user: dylanh
+      ignore_errors: true
+
+    - name: tmux split
+      git:
+        repo: "https://gitea.sectigo.net/dylanh/tmuxsplit.git""
+        dest: "{{ userdir }}/development/tmuxsplit"
+      become: true
+      become_user: dylanh
+      ignore_errors: true
 # zsh and oh my zsh configuration
 
     - name: install zshrc
       copy:
         dest: "{{ userdir }}/.zshrc"
         src: files/zsh/zshrc
-        owner: dylanh
+        mode: '0644'
+      become: yes
+      become_user: dylanh
+      tags:
+        - createuser
+
+    - name: install zsh aliases
+      copy:
+        dest: "{{ userdir }}/.zshrc/"
+        src: files/zsh/zshalias
         mode: '0644'
       become: yes
       become_user: dylanh
@@ -113,8 +141,10 @@
 
     - name: check for host specific hotkeys
       find:
-        path: "./vars/{{ inventory_hostname }}_hotkeys.yml"
+        path: "./vars/"
+        pattern: "{{ inventory_hostname }}_hotkeys.yml"
       register: hosthotkeys
+      delegate_to: localhost
       tags: hotkeys
 
     - name: include host specific hotkey vars

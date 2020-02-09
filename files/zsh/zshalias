@@ -1,0 +1,10 @@
+alias ipcalc="ipcalc -n"
+alias sr="sudo -i"
+alias sshh="ssh -Y dylanh@hoff.brad.office.comodoca.net"
+alias reboot="sudo reboot"
+alias rdesktop='rdesktop -k en-gb -g 1152x864 -r clipboard:PRIMARYCLIPBOARD -r disk:dylans=/home/dylan/temp/'
+alias findhost="~/tools/findhost.pl"
+alias mount="sudo mount"
+alias umount="sudo umount"
+alias k="kubectl"
+alias tms="~/tools/tmuxsplit/tmuxsplit.sh"
