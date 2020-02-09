@@ -316,10 +316,14 @@
 
     - name: set some network settings hoff
       set_fact:
-        net_ipaddr: 192.168.0.120/24
-        net_gw: 192.168.0.10
-        net_dns: 10.127.10.127
-        net_search: brad.office.comodoca.net
+        #        net_ipaddr: 192.168.0.120/24
+        #        net_gw: 192.168.0.10
+        #        net_dns: 10.127.10.127
+        #        net_search: brad.office.comodoca.net
+        net_ipaddr: 10.10.4.123/24
+        net_gw: 10.10.4.1
+        net_dns: 10.10.4.11
+        net_search: sysadminology.net
       when:
         - inventory_hostname =='hoff'
 
@@ -335,12 +339,12 @@
 
     - name: prevent the nouveau display module from loading, if we're on redeye or geosword
       copy:
-        dest: /etc/modprobe.d/block_nouveau.conf
+        dest: /mnt/etc/modprobe.d/block_nouveau.conf
         content: |
           # The below actually black lists this module and its dependents
           install nouveau /bin/true
       when:
-        - (inventory_hostname == 'redeye' or inventory_hostname == 'geosword')
+        - (inventory_hostname == 'redeye' or inventory_hostname == 'geosword' or inventory_hostname == 'hoff')
 
     - name: prevent the tty from clearing before the login prompt
       copy:

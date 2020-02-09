@@ -33,33 +33,19 @@
       tags:
         - createfolders
 
+    - name: reload hotkeys script
+      copy:
+        src: files/defaults/files/tools/reloadhotkeys.sh
+        dest: "{{ userdir }}/tools/"
+      become: true
+      become_user: dylanh
+
     - name: switch.py for launching and switching hotness
       git:
         repo: "https://gitea.sectigo.net/dylanh/switchto.git"
         dest: "{{ userdir }}/tools/switchto"
       become: true
       become_user: dylanh
-
-# bash configuration
-    - name: install bash_profile
-      copy:
-        dest: "{{ userdir }}/.bash_profile"
-        mode: '0644'
-        content: |
-          if [ -f ~/.bashrc ]; then
-          	. ~/.bashrc
-          fi
-      tags:
-        - createuser
-
-    - name: install bashrc
-      copy:
-        dest: "{{ userdir }}/.bashrc"
-        src: files/bash/bashrc
-        owner: dylanh
-        mode: '0644'
-      tags:
-        - createuser
 
 # zsh and oh my zsh configuration
 
@@ -123,17 +109,20 @@
     - name: include default hotkey vars
       include_vars:
         file: default_hotkeys.yml
+      tags: hotkeys
 
     - name: check for host specific hotkeys
       find:
         path: "./vars/{{ inventory_hostname }}_hotkeys.yml"
       register: hosthotkeys
+      tags: hotkeys
 
-    - name: include default hotkey vars
+    - name: include host specific hotkey vars
       include_vars:
         file: "{{ inventory_hostname }}_hotkeys.yml"
       when:
         - hosthotkeys.matched > 0
+      tags: hotkeys
 
     - name: Set the default hotkeys for all hosts
       command: "/usr/bin/kwriteconfig5 --file {{ item.split('|')[0] }} --group '{{ item.split('|')[1] }}' --key '{{ item.split('|')[2] }}' '{{ item.split('|')[3] }}'"
@@ -141,6 +130,7 @@
         - "{{ defaulthotkeys }}"
       become: true
       become_user: dylanh
+      tags: hotkeys
 
     - name: Set the host specific hotkeys
       command: "/usr/bin/kwriteconfig5 --file {{ item.split('|')[0] }} --group '{{ item.split('|')[1] }}' --key '{{ item.split('|')[2] }}' '{{ item.split('|')[3] }}'"
@@ -150,3 +140,4 @@
       become_user: dylanh
       when:
         - hosthotkeys.matched > 0
+      tags: hotkeys

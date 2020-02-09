@@ -31,18 +31,22 @@
         url: "https://www.archlinux.org/mirrorlist/?country=GB&country=DE&country=US&protocol=http&protocol=https&ip_version=4&use_mirror_status=on"
         dest: "/etc/pacman.d/mirrorlist"
         force: yes
+      tags: packages
 
     - name: "uncomment `#Server` in pacman mirror list"
       replace:
         dest: "/etc/pacman.d/mirrorlist"
         regexp: '^#Server'
         replace: 'Server'
+      tags: packages
 
     - name: Synchronise the package databases
       command: /usr/bin/pacman -Syy
+      tags: packages
 
     - name: Refresh the pacman-keys
       command: /usr/bin/pacman-key --refresh-keys
+      tags: packages
 
     - name: "uncomment colors"
       lineinfile:
@@ -217,17 +221,43 @@
         replace: "%wheel ALL=(ALL) NOPASSWD"
 
 
+    - name: check for custom xorg config
+      find:
+        paths: "files/{{ inventory_hostname }}/"
+        patterns: 'xorg.conf'
+      register: customxorg
+
     - name: copy in the xorg for this host. NOTE this assumes the file is in files/hostname/xorg.conf. The file may be empty where such a file is not required.
       copy:
         src: "files/{{ inventory_hostname }}/xorg.conf"
         dest: /etc/X11/xorg.conf
         group: wheel
         mode: '0775'
+      when:
+        - customxorg.matched > 0
+
+    - name: configure autoloading the nvidia modules when appropriate
+      copy:
+        dest: /etc/modules-load.d/nvidia.conf
+        content: |
+          # Load nvidia at boot
+          nvidia
+      when:
+        - (inventory_hostname == 'redeye' or inventory_hostname == 'geosword' or inventory_hostname == 'hoff')
+
+    - name: load the nvidia modules when appropriate
+      modprobe:
+        name: nvidia
+        state: present
+      when:
+        - (inventory_hostname == 'redeye' or inventory_hostname == 'geosword' or inventory_hostname == 'hoff')
 
     - name: get an xorg configuration using nvidia-xconfig
       command: /usr/bin/nvidia-xconfig
       args:
         creates: /etc/X11/xorg.conf
+      when:
+        - customxorg.matched == 0
 
     - name: make the xorg configuration editable by users in the wheel group (me)
       file:
@@ -265,6 +295,15 @@
       tags:
         - sddmconfig
 
+    - name: Autologin for sddm. Will be disabled later
+      copy:
+        dest: /etc/sddm.conf.d/autologin.conf
+        content: |
+          [Autologin]
+          User=dylanh
+          Session=plasma.desktop
+      tags:
+        - sddmconfig
 
 # Some stuff for when we are testing with vagrant
     - name: Include virtualbox operations if we are in virtualbox
@@ -277,7 +316,15 @@
         state: started
         name: sddm.service
         enabled: true
-# this just checks out the repo, you still need to cd to it and run makepkg -s
+
+# TODO: Some files for potential automation:
+# plasma-org.kde.plasma.desktop-appletsrc
+# plasmashellrc
+# These affect (probably amongst other things) which screen the task bar shows on. However copying them into .config and then starting plasma for the first time will not work
+# you will need to start plasma (perhaps using autologin sddm config, AND THEN copy in your customisations)
+#
+#
+
     - name: clone google-chrome repo
       git:
         repo: https://aur.archlinux.org/google-chrome.git
@@ -286,7 +333,7 @@
       tags:
         - installchrome
 
-    - name: make google-chrome source code available to me
+    - name: make google-chrome source code available to me (dylanh user)
       file: 
         path: /usr/src/google-chrome
         group: wheel
@@ -294,33 +341,12 @@
       tags:
         - installchrome
 
-    - name: run makepkg in the google-chrome folder we just made
-      command: chdir=/usr/src/google-chrome makepkg -s --noconfirm
+    - name: Build and install chrome
+      command: chdir=/usr/src/google-chrome makepkg -sirc --noconfirm
       args:
         creates: /usr/src/google-chrome/google-chrome-*.pkg.tar.xz
       become: true
       become_user: dylanh
-      tags:
-        - installchrome
-
-# This pattern could be a bit loose
-    - name: get a list of pkg.tar.xz files to install
-      find:
-        paths: /usr/src/google-chrome/
-        patterns: '*.pkg.tar.xz'
-      register: chromepackage
-      tags:
-        - installchrome
-
-# now to install it, provided it not installed.
-    - name: now install the package we just makepkg'd. I hope we can install using wildcards.
-      command: chdir=/usr/src/google-chrome pacman -U --noconfirm {{ item.path | basename }}
-      with_items: "{{ chromepackage.files }}"
-      failed_when: chromepackage.matched == 0
-      args:
-        creates: /usr/bin/google-chrome-stable
-      when:
-        - chromepackage.matched > 0
       tags:
         - installchrome
 
