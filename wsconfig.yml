@@ -25,6 +25,8 @@
         - tools
         - temp
         - .ssh
+        - .zsh
+        - .config
       tags:
         - createfolders
 
@@ -61,7 +63,7 @@
 
     - name: tmux split
       git:
-        repo: "https://gitea.sectigo.net/dylanh/tmuxsplit.git""
+        repo: "https://gitea.sectigo.net/dylanh/tmuxsplit.git"
         dest: "{{ userdir }}/development/tmuxsplit"
       become: true
       become_user: dylanh
@@ -80,8 +82,8 @@
 
     - name: install zsh aliases
       copy:
-        dest: "{{ userdir }}/.zshrc/"
-        src: files/zsh/zshalias
+        dest: "{{ userdir }}/.zsh/aliases"
+        src: files/zsh/zshaliases
         mode: '0644'
       become: yes
       become_user: dylanh
@@ -102,6 +104,15 @@
       become: yes
       become_user: dylanh
 
+    - name: install ssh client config
+      copy:
+        dest: "{{ userdir }}/.ssh/"
+        src: files/defaults/files/sshconfig
+        mode: '0644'
+      become: yes
+      become_user: dylanh
+      tags:
+        - createuser
 # https://www.reddit.com/r/kde/comments/6u0wo7/configuring_kde_by_editing_the_config_files/
 # https://bugs.kde.org/show_bug.cgi?id=300532
 # Adopt ~/.config/kglobalshortcutsrc to your needs
@@ -171,3 +182,11 @@
       when:
         - hosthotkeys.matched > 0
       tags: hotkeys
+# latte configuration
+    - name: latte configuration. This will probably make copying plasma-org.kde.plasma.desktop-appletsrc redundant
+      copy:
+        src: files/defaults/files/latte
+        dest: "{{ userdir }}/.config/"
+      become: true
+      become_user: dylanh
+

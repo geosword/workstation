@@ -122,56 +122,19 @@
       tags:
         - disablecowsay
 
-# install kubectl 
-
-    - name: install kubectl
-      shell:
-        cmd: "curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
-        chdir: "/usr/local/sbin/"
-        creates: "/usr/local/sbin/kubectl"
-
-# Install sublime text
-    - name: fetch sublime repo key for arch
-      get_url: 
-        url: https://download.sublimetext.com/sublimehq-pub.gpg
-        dest: /var/tmp/sublimehq-pub.gpg
-      tags: installsublime
-
-    - name: add the key
-      command: pacman-key --add /var/tmp/sublimehq-pub.gpg
-      tags: installsublime
-
-    - name: sign it
-      command: pacman-key --lsign-key 8A8F901A
-      tags: installsublime
-
-    - name: remove the key from /var/tmp
-      file:
-        path: /var/tmp/sublimehq-pub.gpg
-        state: absent
-      tags: installsublime
-
-   # add the sublime repo to pacman.conf
-    - name: add sublime repo to pacman.conf
-      blockinfile:
-        path: /etc/pacman.conf
-        block: |
-          [sublime-text]
-          Server = https://download.sublimetext.com/arch/dev/x86_64
-      tags: installsublime
-
-    - name: now install. We'll use command cause we need special pacman flags (-uy) This could take a while, check /var/log/pacman.log for progress
-      command: pacman -Syu --noconfirm sublime-text
-      args:
-        creates: /opt/sublime_text/sublime_text
-      tags: installsublime
-
 ## create the group for the non privileged user
     - name: create group
       group:
         name: dylanh
       tags:
         - createuser
+
+# Allow members of wheel to privilege escalate without a password
+    - name: allow wheel passwordless sudo privs
+      replace:
+        dest: "/etc/sudoers"
+        regexp: "^# %wheel ALL=\\(ALL\\) NOPASSWD"
+        replace: "%wheel ALL=(ALL) NOPASSWD"
 
 ## create my non privileged user
     - name: create user
@@ -197,6 +160,61 @@
         group: dylanh
       tags:
         - createuser
+# install kubectl 
+
+    - name: install kubectl
+      shell:
+        cmd: "curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
+        chdir: "/usr/local/sbin/"
+        creates: "/usr/local/sbin/kubectl"
+
+# Install canonical's snap from the AUR (another package management system to unify them all)
+    - name: clone Snap AUR
+      git:
+        repo: https://aur.archlinux.org/snapd.git
+        dest: /usr/src/snapd
+        update: no
+      tags:
+        - installsnap
+
+    - name: make snap source code available to me (dylanh user)
+      file: 
+        path: /usr/src/snapd
+        group: wheel
+        mode: '0775'
+      tags:
+        - installsnap
+
+    - name: Build and install snap
+      command: chdir=/usr/src/snapd makepkg -sirc --noconfirm
+      become: true
+      become_user: dylanh
+      tags:
+        - installsnap
+
+    - name: enable apparmor so that snaps dont have free reign on the system
+      systemd:
+        name: apparmor
+        state: started
+        enabled: yes
+
+    - name: enable the snap socket. i think this listens for snap trying to connect, and starts the snapd server if so
+      systemd:
+        name: snapd.socket
+        state: started
+        enabled: yes
+
+    - name: /snap is needed for snap client to work. A bit lame.
+      file:
+        src: /var/lib/snapd/snap
+        dest: /snap
+        state: link
+
+#  Install sublime text
+    - name: install sublime from snap
+      snap:
+        name: sublime-text
+        classic: yes
 
 # we going to use systemd-resolved against my better judgement
     - name: replace /etc/resolv.conf with a link to system-resolved configuration
@@ -235,13 +253,6 @@
         mode: u+s
       tags:
         - stickybit
-
-# Allow members of wheel to privilege escalate without a password
-    - name: allow wheel passwordless sudo privs
-      replace:
-        dest: "/etc/sudoers"
-        regexp: "^# %wheel ALL=\\(ALL\\) NOPASSWD"
-        replace: "%wheel ALL=(ALL) NOPASSWD"
 
 
     - name: check for custom xorg config
@@ -372,8 +383,6 @@
 
     - name: Build and install chrome
       command: chdir=/usr/src/google-chrome makepkg -sirc --noconfirm
-      args:
-        creates: /usr/src/google-chrome/google-chrome-*.pkg.tar.xz
       become: true
       become_user: dylanh
       tags:
