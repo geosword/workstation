@@ -1,0 +1,7 @@
+[user]
+	email = dylanjhumphreys@gmail.com
+	name = Dylan Humphreys
+[credential]
+	helper = store
+[push]
+	default = simple

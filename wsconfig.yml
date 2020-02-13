@@ -3,6 +3,7 @@
 # with config files
 
 
+# TODO you can / should probably run this AS your user, and escalate when required
 - hosts: all
   tasks:
     - name: include some global variables
@@ -28,6 +29,15 @@
         - .zsh
       tags:
         - createfolders
+
+    - name: git configuration
+      copy:
+        src: files/git/gitconfig
+        dest: "{{ userdir }}/.gitconfig"
+      become: true
+      become_user: dylanh
+      tags:
+        - gitconfig
 
     - name: reload hotkeys script
       copy:

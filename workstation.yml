@@ -58,6 +58,10 @@
         line: "Color"
 
 # install a bunch of stuff
+# TODO When we want to install new packages IT MUST go here, however there is a lot of stuff in here
+# That we either dont want or dont need to run at the same time, so perhaps seperate out the installation
+# of packages to a different play, or put it in the wsconfig play, but only run the required tasks when a variable is 
+# set e.g. installpackages=true
     - name: install a bunch of stuff
       command: "/usr/bin/pacman -S --noconfirm {{ item }}"
       with_items:
@@ -92,6 +96,7 @@
         - nvidia-utils
         - pavucontrol
         - plasma
+        - powerline
         - pwgen
         - python-virtualenv
         - rdesktop
@@ -277,14 +282,14 @@
           # Load nvidia at boot
           nvidia
       when:
-        - (inventory_hostname == 'redeye' or inventory_hostname == 'geosword' or inventory_hostname == 'hoff')
+        - (inventory_hostname == 'milano' or inventory_hostname == 'geosword' or inventory_hostname == 'hoff')
 
     - name: load the nvidia modules when appropriate
       modprobe:
         name: nvidia
         state: present
       when:
-        - (inventory_hostname == 'redeye' or inventory_hostname == 'geosword' or inventory_hostname == 'hoff')
+        - (inventory_hostname == 'milano' or inventory_hostname == 'geosword' or inventory_hostname == 'hoff')
 
     - name: get an xorg configuration using nvidia-xconfig
       command: /usr/bin/nvidia-xconfig
@@ -292,7 +297,7 @@
         creates: /etc/X11/xorg.conf
       when:
         - customxorg.matched == 0
-        - (inventory_hostname == 'redeye' or inventory_hostname == 'geosword' or inventory_hostname == 'hoff')
+        - (inventory_hostname == 'milano' or inventory_hostname == 'geosword' or inventory_hostname == 'hoff')
 
     - name: make the xorg configuration editable by users in the wheel group (me)
       file:

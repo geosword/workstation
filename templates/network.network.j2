@@ -1,6 +1,10 @@
 [Match]
 Name=eth0
 
+# DH: NOTE for some reason systemd-resolved CAN take minutes to resolve its first lookup. So if you are testing your connection
+# and try and ping a host name, wait for a few mins before deciding its broken. Even better, leave it running in a terminal
+# fire up a different terminal and use the hosts command to lookup a name with your chosen dns server directly. If it resolves, then 
+# just wait for resolved to do its thing. Subsequent resolutions will be as fast as you would expect
 [Network]
 {% if net_ipaddr is defined %}
 Address={{ net_ipaddr }}

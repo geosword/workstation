@@ -1,0 +1,7 @@
+[user]
+        email = dylan.humphreys@sectigo.com
+        name = Dylan Humphreys
+[credential]
+	helper = store
+[push]
+	default = simple
