@@ -1078,7 +1078,7 @@ Type=SIMPLE_ACTION_DATA
 ActionsCount=1
 
 [Data_4_5Actions0]
-CommandURL=/home/dylanh/tools/switchto/switchto.py -c riot.riot -e /opt/Riot/riot-web
+CommandURL=/home/dylanh/tools/switchto/switchto.py -c riot.riot -e /usr/bin/riot-desktop
 Type=COMMAND_URL
 
 [Data_4_5Conditions]

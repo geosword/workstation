@@ -97,8 +97,12 @@
         - pavucontrol
         - plasma
         - powerline
+        - powerline-vim
+        - powerline-fonts
         - pwgen
+        - python2
         - python-virtualenv
+        - python2-virtualenv
         - rdesktop
         - rdiff-backup
         - riot-desktop
@@ -109,6 +113,7 @@
         - tmux
         - vim
         - wmctrl
+        - xclip
         - xdotool
         - xorg
         - xorg-xinit

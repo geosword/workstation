@@ -1,0 +1,68 @@
+set number
+set nocompatible              " be iMproved, required
+filetype off                  " required
+
+" required because we have two versions of python installed
+let g:powerline_pycmd="py3"
+
+set cursorline                          " put a horizontal line on the line where the cursor is
+" ansible-vim options start
+let g:ansible_unindent_after_newline = 1
+let g:ansible_attribute_highlight = "ob"
+let g:ansible_name_highlight = 'd'
+let g:ansible_extra_keywords_highlight = 1
+
+" ansible-vim options stop
+" synastic options start
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=col:\ %c
+set statusline+=%*
+" tabs
+set autoindent noexpandtab softtabstop=2 tabstop=2 shiftwidth=2
+" we ALWAYS want unix line endings
+set fileformat=unix
+
+let g:python_highlight_all = 1
+
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 1
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
+let g:syntastic_python_checkers = ['python']
+let g:syntastic_puppet_puppetlint_args = "--no-hard_tabs-check --no-variable_is_lowercase-check --no-case_without_default-check --no-2sp_soft_tabs --no-trailing_whitespace --no-autoloader_layout --no-puppet_url_without_modules --no-arrow_alignment --no-140chars --no-arrow_on_right_operand_line --no-nested_classes_or_defines" 
+" Stop ansible lint bitching about long lines
+let g:syntastic_ansible_ansible_lint_args = "-x 204 -x 305"
+" synastic option end
+" disable Ex mode, we have no use for it
+map q: <Nop>
+nnoremap Q <nop>
+" reload vimrc with rv
+nnoremap <leader>rv :source $MYVIMRC<CR>
+" load vimrc for editing
+nnoremap confe :tabe $MYVIMRC<CR> 
+
+" https://superuser.com/questions/410982/in-vim-how-can-i-quickly-switch-between-tabs
+" this remaps shift J and shift K to moving tabs, just like in chromium within
+" vimium installed
+" A ctrl+shift+[JK] for insert mode
+nnoremap J gT
+nnoremap K gt
+inoremap <C-J> <ESC>gTi
+inoremap <C-K> <ESC>gti
+
+set pastetoggle=<F2>
+nnoremap <space> :
+" disable : so we use space instead
+noremap : <NOP>
+" make vim play nice with yaml files
+autocmd FileType *.yaml,*.yml tabstop=2 softtabstop=2 shiftwidth=2 expandtab smarttab
+" python settings are loaded from /usr/share/vim/vim74/ftplugin/python.vim
+" autocmd FileType *.py tabstop=8 softtabstop=8 shiftwidth=4 noexpandtab smarttab
+
+" and puppet files
+" Set the tab and EOL characters
+set listchars=tab:……,trail:~,extends:>,precedes:<
+" Show tabs and EOL characters
+set list
+

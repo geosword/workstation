@@ -2,6 +2,7 @@
 # Currently it handles three specific files of plasma, but could also manage tmux, vim or anything else we can resonably control
 # with config files
 
+# TODO WE REALLY WANT THIS TO RUN AS QUICKLY AS POSSIBLE
 
 # TODO you can / should probably run this AS your user, and escalate when required
 - hosts: all
@@ -25,6 +26,9 @@
         - Pictures
         - tools
         - temp
+        - .kube
+        - .tmux
+        - .vim
         - .ssh
         - .zsh
       tags:
@@ -43,6 +47,7 @@
       copy:
         src: files/defaults/files/tools/reloadhotkeys.sh
         dest: "{{ userdir }}/tools/"
+        mode: "0770"
       become: true
       become_user: dylanh
 
@@ -61,14 +66,6 @@
         owner: dylanh
       ignore_errors: true
 
-    - name: ansible-workstation for all of this
-      git:
-        repo: "https://gitea.sectigo.net/dylanh/workstation-ansible.git"
-        dest: "{{ userdir }}/development/workstation-ansible"
-      become: true
-      become_user: dylanh
-      ignore_errors: true
-
     - name: tmux split
       git:
         repo: "https://gitea.sectigo.net/dylanh/tmuxsplit.git"
@@ -80,23 +77,34 @@
 
     - name: install zshrc
       copy:
-        dest: "{{ userdir }}/.zshrc"
         src: files/zsh/zshrc
+        dest: "{{ userdir }}/.zsh/zshrc"
         mode: '0644'
       become: yes
       become_user: dylanh
       tags:
-        - createuser
+        - zsh
 
     - name: install zsh aliases
       copy:
-        dest: "{{ userdir }}/.zsh/aliases"
         src: files/zsh/zshaliases
+        dest: "{{ userdir }}/.zsh/aliases"
         mode: '0644'
       become: yes
       become_user: dylanh
       tags:
-        - createuser
+        - zsh
+
+    - name: zsh config symlink
+      file:
+        src: "{{ userdir }}/.zsh/zshrc"
+        dest: "{{ userdir }}/.zshrc"
+        mode: '0644'
+        state: link
+      become: yes
+      become_user: dylanh
+      tags:
+        - zsh
 
     - name: Cloning oh-my-zsh
       git:
@@ -112,6 +120,51 @@
       become: yes
       become_user: dylanh
 
+# Vim stuff
+    - name: install vimrc
+      copy:
+        src: files/vim/vimrc
+        dest: "{{ userdir }}/.vim/vimrc"
+        mode: '0644'
+      become: yes
+      become_user: dylanh
+      tags:
+        - vim
+
+    - name: vim config symlink
+      file:
+        src: "{{ userdir }}/.vim/vimrc"
+        dest: "{{ userdir }}/.vimrc"
+        mode: '0644'
+        state: link
+      become: yes
+      become_user: dylanh
+      tags:
+        - vim
+
+# TMUX stuff
+    - name: install tmux conf
+      copy:
+        src: files/tmux/tmux.conf
+        dest: "{{ userdir }}/.tmux/tmux.conf"
+        mode: '0644'
+      become: yes
+      become_user: dylanh
+      tags:
+        - tmux
+
+    - name: tmux config symlink
+      file:
+        src: "{{ userdir }}/.tmux/tmux.conf"
+        dest: "{{ userdir }}/.tmux.conf"
+        mode: '0644'
+        state: link
+      become: yes
+      become_user: dylanh
+      tags:
+        - tmux
+
+# SSH config
     - name: install ssh client config
       copy:
         dest: "{{ userdir }}/.ssh/"

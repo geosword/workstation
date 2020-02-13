@@ -1,2 +1,2 @@
 #!/bin/bash
-kquitapp kglobalaccel && sleep 2s && kglobalaccel5 &
+kquitapp5 kglobalaccel && sleep 2s && kglobalaccel5 &
