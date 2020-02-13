@@ -26,7 +26,6 @@
         - temp
         - .ssh
         - .zsh
-        - .config
       tags:
         - createfolders
 
@@ -46,12 +45,11 @@
 
     - name: If we have a public key, lets add that to authorized keys, on the basis its OUR public key
       copy:
-        src: "{{ userdir }}/.ssh/id_rsa.pub"
+        src: "/root/.ssh/authorized_keys"
         dest: "{{ userdir }}/.ssh/authorized_keys"
         remote_src: true
+        owner: dylanh
       ignore_errors: true
-      become: true
-      become_user: dylanh
 
     - name: ansible-workstation for all of this
       git:
@@ -135,13 +133,13 @@
       with_items:
 # custom shortcuts
         - khotkeysrc
-# "task bar" config
-        - plasma-org.kde.plasma.desktop-appletsrc
 # Keyboard layout in plasma
         - kcminputrc
         - kxkbrc
 # initially for to make the task switcher "grid" but looks like it could be used to set compositing too
         - kwinrc
+# latte configuration
+        - latte
       become: yes
       become_user: dylanh
 
@@ -182,11 +180,3 @@
       when:
         - hosthotkeys.matched > 0
       tags: hotkeys
-# latte configuration
-    - name: latte configuration. This will probably make copying plasma-org.kde.plasma.desktop-appletsrc redundant
-      copy:
-        src: files/defaults/files/latte
-        dest: "{{ userdir }}/.config/"
-      become: true
-      become_user: dylanh
-
