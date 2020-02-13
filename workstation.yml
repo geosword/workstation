@@ -108,10 +108,12 @@
         - riot-desktop
         - rsync
         - sddm
+        - subversion
         - sudo
         - syncthing
         - tmux
         - vim
+        - wget
         - wmctrl
         - xclip
         - xdotool

@@ -5,34 +5,42 @@ ForwardAgent yes
 
 # wildcards are acceptable
 Host *.brad.dc.comodoca.net
-        user root
+  user root
 
 Host *.mcr.dc.comodoca.net
-        user root
+  user root
 
 Host *.sec.dc.comodoca.net
-        user root
+  user root
+
+Host bddcccfw1.brad.dc.comodoca.net
+  HostName eth0.bddcccfw1.brad.office.ccanet.co.uk
+  user root
+
+Host bddcccfw2.brad.dc.comodoca.net
+  HostName eth0.bddcccfw2.brad.office.ccanet.co.uk
+  user root
 
 host geosword
-        HostName 10.10.4.100
-        user dylanh
-        ServerAliveInterval 60
-        ForwardAgent yes
-        LocalForward 3389 localhost:3389
+  HostName 10.10.4.100
+  user dylanh
+  ServerAliveInterval 60
+  ForwardAgent yes
+  LocalForward 3389 localhost:3389
 
 host externalus
-        HostName 69.10.46.154
-        port 2022
-        user root
-        ServerAliveInterval 60
+  HostName 69.10.46.154
+  port 2022
+  user root
+  ServerAliveInterval 60
 
 host externaleu
-        HostName 138.201.184.4
-        user root
-        ServerAliveInterval 60
+  HostName 138.201.184.4
+  user root
+  ServerAliveInterval 60
 
 host puppet.comodo.net
-        ForwardAgent no
+  ForwardAgent no
 
 
 
