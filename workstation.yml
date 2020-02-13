@@ -91,7 +91,7 @@
         - latte-dock
         - neovim
         - net-tools
-        - nvidia
+        - nvidia-lts
         - nvidia-settings
         - nvidia-utils
         - pavucontrol
@@ -398,3 +398,8 @@
     - name: message
       debug:
         msg: "DO THIS NOW. Set passwords for both dylanh and root to something more secure than test123!!!! ********* Do it!!!! get to tha choppppaaaaaaahhhh!"
+
+
+    - name: message
+      debug:
+        msg: "ALSO: since you've now installed nvidia-lts instead of just nvidia, you may need to grub-mkconfig and reboot. Test it , and see. mod the playbook if you need to."
