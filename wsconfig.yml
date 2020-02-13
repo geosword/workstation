@@ -167,8 +167,8 @@
 # SSH config
     - name: install ssh client config
       copy:
-        dest: "{{ userdir }}/.ssh/"
-        src: files/defaults/files/sshconfig
+        src: files/ssh/config
+        dest: "{{ userdir }}/.ssh/config"
         mode: '0644'
       become: yes
       become_user: dylanh

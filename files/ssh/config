@@ -1,4 +1,3 @@
-HostAuthenticationForLocalhost yes
 # send a keep alive packet every 30 seconds
 ServerAliveInterval 10
 
