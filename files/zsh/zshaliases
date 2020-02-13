@@ -1,6 +1,5 @@
 alias ipcalc="ipcalc -n"
 alias sr="sudo -i"
-alias sshh="ssh -Y dylanh@hoff.brad.office.comodoca.net"
 alias reboot="sudo reboot"
 alias rdesktop='rdesktop -k en-gb -g 1152x864 -r clipboard:PRIMARYCLIPBOARD -r disk:dylans=/home/dylan/temp/'
 alias findhost="~/svn/infra/scripts/findhost.pl"
@@ -10,3 +9,6 @@ alias k="kubectl"
 alias tms="~/tools/tmuxsplit/tmuxsplit.sh"
 alias pptp="ssh root@puppet.comodoca.net 'svn up /etc/puppetlabs/'"
 alias vim="vim -p"
+alias tma="tmux attach -d -t"
+alias cdppt="cd ~/svn/infra/configs/puppetlabs"
+alias pptp="ssh puppet.comodoca.net 'svn up /etc/puppetlabs'"
