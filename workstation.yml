@@ -43,11 +43,12 @@
 
     - name: Synchronise the package databases
       command: /usr/bin/pacman -Syy
-      tags: packages
+      tags: sync-packages
 
     - name: Refresh the pacman-keys
       command: /usr/bin/pacman-key --refresh-keys
-      tags: packages
+      tags: sync-packages
+
 
     - name: "uncomment colors"
       lineinfile:
@@ -67,6 +68,7 @@
       with_items:
 # basic stuff
         - ansible
+        - aws-cli
         - base-devel
         - breeze-gtk
         - bind-tools
@@ -124,7 +126,7 @@
         - zsh
         - zsh-theme-powerlevel9k
       ignore_errors: true
-      tags: packages
+      tags: install-packages
 
     - name: Disable cowsay in ansible, its just annoying
       replace:
