@@ -70,10 +70,13 @@
     - name: tmux split
       git:
         repo: "https://gitea.sectigo.net/dylanh/tmuxsplit.git"
-        dest: "{{ userdir }}/development/tmuxsplit"
+        dest: "{{ userdir }}/tools/tmuxsplit"
       become: true
       become_user: dylanh
       ignore_errors: true
+      tags:
+        - tmuxsplit
+
 # zsh and oh my zsh configuration
 
     - name: install zshrc
