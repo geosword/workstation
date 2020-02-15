@@ -147,6 +147,24 @@
       tags:
         - vim
 
+    - name: add the vim config symlink to the root home folder too, so we have vim goodness when sudo-ing
+      file:
+        src: "{{ userdir }}/.vim/vimrc"
+        dest: "/root/.vimrc"
+        mode: '0644'
+        state: link
+      tags:
+        - vim
+
+    - name: vim config symlink for root
+      file:
+        src: "{{ userdir }}/.vim/vimrc"
+        dest: "/root/.vimrc"
+        mode: '0644'
+        state: link
+      tags:
+        - vim
+
 # TMUX stuff
     - name: install tmux conf
       copy:
