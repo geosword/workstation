@@ -25,12 +25,13 @@
         - Downloads
         - Pictures
         - svn
-        - tools
+        - .tools
         - temp
         - .kube
+        - .ssh
         - .tmux
         - .vim
-        - .ssh
+        - .virtualenvs
         - .zsh
       tags:
         - createfolders
@@ -47,7 +48,7 @@
     - name: reload hotkeys script
       copy:
         src: files/defaults/files/tools/reloadhotkeys.sh
-        dest: "{{ userdir }}/tools/"
+        dest: "{{ userdir }}/.tools/"
         mode: "0770"
       become: true
       become_user: dylanh
@@ -55,7 +56,7 @@
     - name: switch.py for launching and switching hotness
       git:
         repo: "https://gitea.sectigo.net/dylanh/switchto.git"
-        dest: "{{ userdir }}/tools/switchto"
+        dest: "{{ userdir }}/.tools/switchto"
       become: true
       become_user: dylanh
 
@@ -70,7 +71,7 @@
     - name: tmux split
       git:
         repo: "https://gitea.sectigo.net/dylanh/tmuxsplit.git"
-        dest: "{{ userdir }}/tools/tmuxsplit"
+        dest: "{{ userdir }}/.tools/tmuxsplit"
       become: true
       become_user: dylanh
       ignore_errors: true
