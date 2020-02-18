@@ -4,6 +4,7 @@ alias ipcalc="ipcalc -n"
 alias k="kubectl"
 alias mount="sudo mount"
 alias pacman="sudo pacman"
+alias passook="pwgen"
 alias pptp="ssh root@puppet.comodoca.net 'svn up /etc/puppetlabs/'"
 alias reboot="sudo reboot"
 alias rdesktop='rdesktop -k en-gb -g 1152x864 -r clipboard:PRIMARYCLIPBOARD -r disk:dylans=/home/dylan/temp/'

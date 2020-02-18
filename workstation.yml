@@ -125,6 +125,7 @@
         - xdotool
         - xorg
         - xorg-xinit
+        - xsel
 # zathura is a minimal pdf viewer with vim keybindings. https://wiki.archlinux.org/index.php/Zathura
         - zathura
         - zsh
@@ -180,20 +181,23 @@
         - createuser
 
 # install kubectl. we dont use get_url here because its doing a secondary call to find out the current stable release
+# for some reason using the file module to set the permissions just didnt work. It would set the directory and group, but not "other"
     - name: install kubectl
       shell:
-        cmd: "curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
+        cmd: "curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && chmod 775 /usr/local/sbin/kubectl"
         chdir: "/usr/local/sbin/"
         creates: "/usr/local/sbin/kubectl"
+      become: yes
       tags:
         - installkubectl
 
-    - name: set kubectl permissions
-      file:
-        path: "/usr/local/sbin/kubectl"
-        mode: "0774"
+
+    - name: install helm2
+      shell:
+        cmd: "curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && chmod 775 /usr/local/sbin/kubectl"
+        chdir: "/usr/local/sbin/"
+        creates: "/usr/local/sbin/kubectl"
       become: yes
-      become_method: sudo
       tags:
         - installkubectl
 
@@ -226,18 +230,67 @@
         name: apparmor
         state: started
         enabled: yes
+      tags:
+        - installsnap
 
     - name: enable the snap socket. i think this listens for snap trying to connect, and starts the snapd server if so
       systemd:
         name: snapd.socket
         state: started
         enabled: yes
+      tags:
+        - installsnap
 
     - name: /snap is needed for snap client to work. A bit lame.
       file:
         src: /var/lib/snapd/snap
         dest: /snap
         state: link
+      tags:
+        - installsnap
+
+#  Install helm 2 from snap
+    - name: install helm 2 from snap
+      snap:
+        name: helm
+        channel: 2.16/stable
+        classic: yes
+      tags:
+        - installhelm
+
+    - name: link helm 2 from the snaps folder to somewhere usefull
+      file:
+        src: /var/lib/snapd/snap/helm/current/helm
+        dest: /usr/local/sbin/helm2
+        state: link
+      tags:
+        - installhelm
+
+
+#  Install helm 3 from snap
+    - name: install helm 3 from snap
+      snap:
+        name: helm
+        channel: 2.16/stable
+        classic: yes
+      tags:
+        - installhelm
+
+    - name: link helm 3 from the snaps folder to somewhere usefull
+      file:
+        src: /var/lib/snapd/snap/helm_3/current/helm
+        dest: /usr/local/sbin/helm3
+        state: link
+      tags:
+        - installhelm
+
+# remove the helm link from /var/lib/snapd/snap/bin/ so that we cant run helm without specifying a version.
+    - name: remove snap helm link
+      file:
+        path: /var/lib/snapd/snap/bin/helm
+        state: absent
+      tags:
+        - installhelm
 
 #  Install sublime text
     - name: install sublime from snap
