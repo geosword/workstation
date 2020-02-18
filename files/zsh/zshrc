@@ -54,7 +54,9 @@ bindkey "^[[1;5D" backward-word
 #
 # Powerlevel9k
 source /usr/share/zsh-theme-powerlevel9k/powerlevel9k.zsh-theme
-
+# virtualenvwrapper
+source /usr/bin/virtualenvwrapper.sh
+# aliases
 if [ -f ~/.zsh/aliases ]; then
 	source ~/.zsh/aliases
 fi
