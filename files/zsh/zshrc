@@ -60,6 +60,8 @@ fi
 # aws autocomplete
 source /usr/bin/aws_zsh_completer.sh
 # virtualenvwrapper config
+# https://stackoverflow.com/questions/6401951/using-different-versions-of-python-with-virtualenvwrapper
+# mkvirtualenv -p python2.7 venvname
 export WORKON_HOME="~/.virtualenvs"
 source /usr/bin/virtualenvwrapper.sh
 # make tmux pretty. IIRC think makes using zsh a bit happier about using powerlevel9k at a console too.
