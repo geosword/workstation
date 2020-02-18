@@ -29,6 +29,7 @@
         - temp
         - .kube
         - .ssh
+        - .terraform
         - .tmux
         - .vim
         - .virtualenvs
@@ -266,3 +267,8 @@
       when:
         - hosthotkeys.matched > 0
       tags: hotkeys
+
+# TODO some way of patching , perhaps with patch the vcs.zsh file of zsh-themes-powerlevel9k specifically the function that decides if svn working copies are dirty
+# This is the function that runs svn status on an svn working copy for each "enter press" and when working on remote repos (which is most svn working copies) results
+# in a metric shit ton of lag. I'd rather do without the "dirty" notification in the prompt, and just have a responsive command line
+# This could all be made moot by powerlevel10k which purports to run things like this asynchronously: https://www.reddit.com/r/zsh/comments/ay6ny7/powerlevel10k_goes_instant_50_times_faster_than/

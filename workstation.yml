@@ -116,6 +116,7 @@
         - sudo
         - syncthing
         - tcpdump
+        - terraform
         - tmux
         - traceroute
         - vim
