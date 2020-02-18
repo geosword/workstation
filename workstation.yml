@@ -105,6 +105,7 @@
         - pwgen
         - python2
         - python-virtualenv
+        - python-virtualenvwrapper
         - python2-virtualenv
         - rdesktop
         - rdiff-backup
@@ -117,6 +118,7 @@
         - tcpdump
         - terraform
         - tmux
+        - traceroute
         - vim
         - wget
         - wmctrl
@@ -184,6 +186,17 @@
         cmd: "curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
         chdir: "/usr/local/sbin/"
         creates: "/usr/local/sbin/kubectl"
+      tags:
+        - installkubectl
+
+    - name: set kubectl permissions
+      file:
+        path: "/usr/local/sbin/kubectl"
+        mode: "0774"
+      become: yes
+      become_method: sudo
+      tags:
+        - installkubectl
 
 # Install canonical's snap from the AUR (another package management system to unify them all)
     - name: clone Snap AUR
