@@ -94,7 +94,10 @@
         - latte-dock
         - neovim
         - net-tools
+# I do wonder if nvidia AND nvidia-lts is actually needed. Its possible it was added because the particular root image you used was an lts version, the next run however has NOT used an LTS version
+# so hasnt worked with nvidia-lts
         - nvidia-lts
+        - nvidia
         - nvidia-settings
         - nvidia-utils
         - pavucontrol
@@ -271,7 +274,6 @@
     - name: install helm 3 from snap
       snap:
         name: helm
-        channel: 2.16/stable
         classic: yes
       tags:
         - installhelm

@@ -371,6 +371,9 @@
       debug:
         msg: "If the attempt to run efibootmgr above worked, You can reboot the target host now if you like. It should boot up into your new arch linux install!!"
 
+    - name: message
+      debug:
+        msg: "You'll want to verify with efibootmgr -v that the boot order is actually correct. On geosword it might not be""
 #TODO we COULD instigate a reboot here - or make it part of a "super playbook", and let it handle the reboot, and associated wait for it to come backup
 # because you would need to add_host the host based on the ip set above.... hmmm...
 
