@@ -28,6 +28,14 @@ host geosword
   ForwardAgent yes
   LocalForward 3389 localhost:3389
 
+host milano
+  Hostname 10.100.38.120
+  user dylanh
+
+host hoff
+  Hostname hoff.brad.office.comodoca.net
+  user dylanh
+
 host externalus
   HostName 69.10.46.154
   port 2022
