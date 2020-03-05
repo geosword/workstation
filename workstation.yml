@@ -193,15 +193,6 @@
         - installkubectl
 
 
-    - name: install helm2
-      shell:
-        cmd: "curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && chmod 775 /usr/local/sbin/kubectl"
-        chdir: "/usr/local/sbin/"
-        creates: "/usr/local/sbin/kubectl"
-      become: yes
-      tags:
-        - installkubectl
-
 # Install canonical's snap from the AUR (another package management system to unify them all)
     - name: clone Snap AUR
       git:
@@ -247,6 +238,14 @@
         src: /var/lib/snapd/snap
         dest: /snap
         state: link
+      tags:
+        - installsnap
+
+
+    - name: enable parallel snaps (install multiple versions of the same package) We do this for helm2 and helm3
+      shell:
+        cmd: "/usr/bin/snap set system experimental.parallel-instances=true"
+      become: yes
       tags:
         - installsnap
 
