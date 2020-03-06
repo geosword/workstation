@@ -75,6 +75,7 @@
 # THERES more STUFF TO DO FOR SETTING UP BLUETOOTH. check the archlinux bluetooth page for details
         - bluez
         - bluez-utils
+        - cups
         - docker
         - dolphin
 # fakeroot is needed for makepkg which is needed to install google-chrome.
@@ -82,6 +83,7 @@
         - firefox
         - git
         - grub
+        - gnome-keyring
         - hwinfo
         - ipcalc
         - icu
@@ -195,6 +197,22 @@
       tags:
         - installkubectl
 
+
+    - name: enable cups for printing. This starts the socket, so if we access cups it will start it
+      systemd:
+        name: bluetooth.service
+        state: started
+        enabled: yes
+      tags:
+        - bluetooth
+
+    - name: enable cups for printing. This starts the socket, so if we access cups it will start it
+      systemd:
+        name: org.cups.cupsd.service
+        state: started
+        enabled: yes
+      tags:
+        - cups
 
 # Install canonical's snap from the AUR (another package management system to unify them all)
     - name: clone Snap AUR
@@ -393,7 +411,7 @@
         group: dylanh
 
     - name: create an sddm config drop in folder
-      file: 
+      file:
         path: /etc/sddm.conf.d/
         state: directory
         mode: '0755'
