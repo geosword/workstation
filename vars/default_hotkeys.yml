@@ -4,3 +4,6 @@ defaulthotkeys:
   - "kglobalshortcutsrc|kwin|Window Maximize|Meta+Up,none,Maximise Window"
   - "kglobalshortcutsrc|kwin|Window Minimize|Meta+Down,none,Minimise Window"
   - "kglobalshortcutsrc|kwin|Window Close|Alt+Q,none,Close Window"
+  - "kdeglobals|KDE|SingleClick|false"
+  - "kscreenlockerrc|Daemon|Timeout|20"
+  - "kscreenlockerrc|Daemon|LockGrace|15"
