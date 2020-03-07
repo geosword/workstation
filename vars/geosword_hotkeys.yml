@@ -1,0 +1,5 @@
+hotkeys:
+  - "kglobalshortcutsrc|kwin|Window to Screen 0|Meta+!,none,Window to Screen 0"
+  - "kglobalshortcutsrc|kwin|Window to Screen 1|Meta+\",none,Window to Screen 1"
+  - "kglobalshortcutsrc|kwin|Window to Screen 2|Meta+£,none,Window to Screen 2"
+  - "kglobalshortcutsrc|kwin|Window to Screen 3|Meta+$,none,Window to Screen 3"
