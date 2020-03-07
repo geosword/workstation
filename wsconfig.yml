@@ -279,6 +279,13 @@
       when:
         - (inventory_hostname == 'geosword')
 
+    - name: Include the vbox play to INSTALL virtualbox if we're on geosword
+      include: vbox.yml
+      when:
+        - (inventory_hostname == 'geosword')
+      tags:
+        - vbox
+
 # TODO some way of patching , perhaps with patch the vcs.zsh file of zsh-themes-powerlevel9k specifically the function that decides if svn working copies are dirty
 # This is the function that runs svn status on an svn working copy for each "enter press" and when working on remote repos (which is most svn working copies) results
 # in a metric shit ton of lag. I'd rather do without the "dirty" notification in the prompt, and just have a responsive command line

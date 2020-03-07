@@ -76,6 +76,7 @@
         - bluez
         - bluez-utils
         - cups
+        - cronie
         - docker
         - dolphin
 # fakeroot is needed for makepkg which is needed to install google-chrome.
@@ -96,9 +97,6 @@
         - latte-dock
         - neovim
         - net-tools
-# I do wonder if nvidia AND nvidia-lts is actually needed. Its possible it was added because the particular root image you used was an lts version, the next run however has NOT used an LTS version
-# so hasnt worked with nvidia-lts
-        - nvidia-lts
         - nvidia
         - nvidia-settings
         - nvidia-utils
@@ -224,7 +222,7 @@
         - installsnap
 
     - name: make snap source code available to me (dylanh user)
-      file: 
+      file:
         path: /usr/src/snapd
         group: wheel
         mode: '0775'
@@ -445,7 +443,7 @@
 # Some stuff for when we are testing with vagrant
     - name: Include virtualbox operations if we are in virtualbox
       include: virtualbox.yaml
-      when: 
+      when:
         - ansible_virtualization_type == 'virtualbox'
 
     - name: enable & start sddm
@@ -468,6 +466,7 @@
         update: no
       tags:
         - installchrome
+
     - name: make google-chrome source code available to me (dylanh user)
       file: 
         path: /usr/src/google-chrome
@@ -475,6 +474,7 @@
         mode: '0775'
       tags:
         - installchrome
+
     - name: Build and install chrome
       command: chdir=/usr/src/google-chrome makepkg -sirc --noconfirm
       become: true
@@ -487,11 +487,46 @@
         path: /etc/sddm.conf.d/autologin.conf
         state: absent
 
+    - name: add the backup scripts when on geosword
+      copy:
+        src: "{{ item }}"
+        dest: "{{ userdir }}/.tools/"
+        mode: "0744"
+        owner: dylanh
+        group: dylanh
+      with_items:
+        - files/geosword/backupme.sh
+        - files/geosword/backuphome.sh
+      when:
+        - (inventory_hostname == 'geosword')
+      tags:
+        - backupscripts
+
+    - name: backup host cronjob
+      cron:
+        name: backup host
+        minute: 0
+        hour: 2
+        job: "{{ userdir }}/.tools/backupme.sh"
+        user: root
+      when:
+        - (inventory_hostname == 'geosword')
+      tags:
+        - backupscripts
+
+    - name: backup home cronjob
+      cron:
+        name: backup home
+        minute: 0
+        hour: 23
+        weekday: 5
+        job: "{{ userdir }}/.tools/backuphome.sh"
+        user: root
+      when:
+        - (inventory_hostname == 'geosword')
+      tags:
+        - backupscripts
+
     - name: message
       debug:
         msg: "DO THIS NOW. Set passwords for both dylanh and root to something more secure than test123!!!! ********* Do it!!!! get to tha choppppaaaaaaahhhh!"
-
-
-    - name: message
-      debug:
-        msg: "ALSO: since you've now installed nvidia-lts instead of just nvidia, you may need to grub-mkconfig and reboot. Test it , and see. mod the playbook if you need to."

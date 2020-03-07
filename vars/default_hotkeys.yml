@@ -7,3 +7,4 @@ defaulthotkeys:
   - "kdeglobals|KDE|SingleClick|false"
   - "kscreenlockerrc|Daemon|Timeout|20"
   - "kscreenlockerrc|Daemon|LockGrace|15"
+  - "konsolerc|KonsoleWindow|ShowMenuBarByDefault|false"

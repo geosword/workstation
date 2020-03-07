@@ -1,0 +1,37 @@
+# Things to run when arch needs virtualbox installing
+    - name: Synchronise the package databases
+      command: /usr/bin/pacman -Syy
+      tags: sync-packages
+
+    - name: install virtualbox
+      command: "/usr/bin/pacman -S --noconfirm {{ item }}"
+      with_items:
+        - virtualbox
+        - virtualbox-host-modules-arch
+
+    - name: clone virtualbox-extensions-pack AUR
+      git:
+        repo: https://aur.archlinux.org/virtualbox-ext-oracle.git
+        dest: /usr/src/virtualbox-ext-oracle
+        update: no
+
+    - name: make snap source code available to me (dylanh user)
+      file:
+        path: /usr/src/virtualbox-ext-oracle
+        group: wheel
+        mode: '0775'
+
+    - name: Build and install extensions pack
+      command: chdir=/usr/src/virtualbox-ext-oracle makepkg -sirc --noconfirm
+      become: true
+      become_user: dylanh
+
+    - name: load the modules
+      modprobe:
+        name: "{{ item}}"
+        state: present
+      with_items:
+        - vboxdrv
+        - vboxnetadp
+        - vboxnetflt
+
