@@ -8,3 +8,4 @@ defaulthotkeys:
   - "kscreenlockerrc|Daemon|Timeout|20"
   - "kscreenlockerrc|Daemon|LockGrace|15"
   - "konsolerc|KonsoleWindow|ShowMenuBarByDefault|false"
+  - "mimeapps.list|Added Associations|application/pdf|org.pwmt.zathura.desktop"
