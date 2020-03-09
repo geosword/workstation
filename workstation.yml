@@ -68,6 +68,7 @@
       with_items:
 # basic stuff
         - ansible
+        - awesome-terminal-fonts
         - aws-cli
         - base-devel
         - breeze-gtk
@@ -79,7 +80,7 @@
         - cronie
         - docker
         - dolphin
-# fakeroot is needed for makepkg which is needed to install google-chrome.
+# fakeroot is needed for makepkg which is needed to install google-chrome and other stuff in the AUR
         - fakeroot
         - firefox
 # Ghostscript is needed for printing to work.
@@ -487,6 +488,32 @@
       become_user: dylanh
       tags:
         - installchrome
+
+# Install powerlevel10k.
+    - name: clone powerlevel10k
+      git:
+        repo: https://aur.archlinux.org/zsh-theme-powerlevel10k-git.git
+        dest: /usr/src/zsh-theme-powerlevel10k-git
+        update: no
+      tags:
+        - powerlevel10k
+
+    - name: make powerlevel10k source code available to me (dylanh user)
+      file:
+        path: /usr/src/zsh-theme-powerlevel10k-git
+        group: wheel
+        mode: '0775'
+      tags:
+        - powerlevel10k
+
+    - name: Build and install powerlevel10k
+      command: chdir=/usr/src/zsh-theme-powerlevel10k-git makepkg -sirc --noconfirm
+      become: true
+      become_user: dylanh
+      tags:
+        - powerlevel10k
+
+# some general stuff
 
     - name: remove autologin config
       file:
