@@ -80,6 +80,13 @@
         - cronie
         - docker
         - dolphin
+# Clementine is a Music player with plasma media integration. Yes it needs all those plugins to work.
+        - Clementine
+        - gst-plugins-good
+        - gst-plugins-base
+        - gst-libav
+        - gst-plugins-bad
+        - gst-plugins-ugly
 # fakeroot is needed for makepkg which is needed to install google-chrome and other stuff in the AUR
         - fakeroot
         - firefox
@@ -88,6 +95,9 @@
         - git
         - grub
         - gnome-keyring
+        - gwenview
+# Drivers for most hp printers
+        - hplip
         - hwinfo
         - ipcalc
         - icu
@@ -99,6 +109,7 @@
         - kde-gtk-config
         - kwalletmanager
         - latte-dock
+        - lsoflatte-dock
         - neovim
         - net-tools
         - nvidia
@@ -129,6 +140,7 @@
         - tmux
         - traceroute
         - vim
+        - vlc
         - wget
         - wmctrl
         - xclip
@@ -136,6 +148,7 @@
         - xorg
         - xorg-xinit
         - xsel
+        - youtube-dl
 # zathura is a minimal pdf viewer with vim keybindings. https://wiki.archlinux.org/index.php/Zathura
         - zathura
         - zathura-pdf-mupdf
@@ -512,6 +525,32 @@
       become_user: dylanh
       tags:
         - powerlevel10k
+
+# Install kwalletcli which we use for inserting secrets into the kdewallet. These are then used for file encryption. E.g. terraform credentials
+# An alertative might be to keep consul / vmware username password in the wallet itself, but then it would be available to (for example) someone knocking me out
+# and using my workstation before I had a chance to lock it. This way, they would have to know that the encryption key for a given file is in the wallet, go from there.
+    - name: clone kwalletcli
+      git:
+        repo: https://aur.archlinux.org/kwalletcli.git
+        dest: /usr/src/kwalletcli
+        update: no
+      tags:
+        - kwalletcli
+
+    - name: make powerlevel10k source code available to me (dylanh user)
+      file:
+        path: /usr/src/kwalletcli
+        group: wheel
+        mode: '0775'
+      tags:
+        - kwalletcli
+
+    - name: Build and install powerlevel10k
+      command: chdir=/usr/src/kwalletcli makepkg -sirc --noconfirm
+      become: true
+      become_user: dylanh
+      tags:
+        - kwalletcli
 
 # some general stuff
 

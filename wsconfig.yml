@@ -227,6 +227,8 @@
         - kwinrc
 # latte configuration
         - latte
+# Clementine Music player
+        - Clementine.conf
       become: yes
       become_user: dylanh
 
@@ -269,15 +271,6 @@
       tags: hotkeys
 
     # run /home/dylanh/.tools/reloadhotkeys.sh to ... reload hotkeys
-
-    - name: Get the ppd for the printer at home
-      get_url:
-        url: "https://www.openprinting.org/ppd-o-matic.php?driver=pxlmono&printer=HP-LaserJet_1320&show=0"
-        dest: "/home/dylanh/Downloads/hplj120n.ppd"
-        force: yes
-      tags: printer
-      when:
-        - (inventory_hostname == 'geosword')
 
     - name: Include the vbox play to INSTALL virtualbox if we're on geosword
       include: vbox.yml
