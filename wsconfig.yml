@@ -115,6 +115,11 @@
         - zsh
 
     - name: zsh functions
+      copy:
+        src: "files/zsh/functions/{{ item }}"
+        dest: "{{ userdir }}/.zsh/functions/{{ item}}"
+      with_items:
+        - terraform
 
     - name: Cloning oh-my-zsh
       git:
