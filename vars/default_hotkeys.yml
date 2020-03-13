@@ -8,7 +8,7 @@ defaulthotkeys:
   - "kglobalshortcutsrc|ksmserver|Log Out|none,none,Log Out"
   - "kglobalshortcutsrc|ksmserver|Halt Without Confirmation|none,none,Halt Without Confirmation"
   - "kglobalshortcutsrc|ksmserver|Reboot Without Confirmation|none,none,Reboot Without Confirmation"
-  - "kglobalshortcutsrc|kwin|Window No Border=Meta+H,none,Hide Window Border"
+  - "kglobalshortcutsrc|kwin|Window No Border|Meta+H,none,Hide Window Border"
   - "kdeglobals|KDE|SingleClick|false"
   - "kscreenlockerrc|Daemon|Timeout|20"
   - "kscreenlockerrc|Daemon|LockGrace|15"

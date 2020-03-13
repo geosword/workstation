@@ -184,8 +184,8 @@
       user:
         name: dylanh
         shell: /usr/bin/zsh
-# lp group allows bluetooth access, wheel allows root access to things
-        groups: wheel,dylanh,lp,cups
+# lp group allows bluetooth access, wheel allows root access to things, informant membership is needed to allow it to mark arch communication / upgrade messages as read
+        groups: wheel,dylanh,lp,cups,informant
         group: dylanh
         # the password is test123
         password: "$6$8TfIqE.dd/0iUF1Q$txKOLAfCAfofs8OCljKEtXFoXJjZamLsMVe/0EVy5yvr3z2USWsrG2wRwC0c4ARWsZ4ckFPcrEcl/fp9aSn4J/"
@@ -526,31 +526,29 @@
       tags:
         - powerlevel10k
 
-# Install kwalletcli which we use for inserting secrets into the kdewallet. These are then used for file encryption. E.g. terraform credentials
-# An alertative might be to keep consul / vmware username password in the wallet itself, but then it would be available to (for example) someone knocking me out
-# and using my workstation before I had a chance to lock it. This way, they would have to know that the encryption key for a given file is in the wallet, go from there.
-    - name: clone kwalletcli
+# Install informant that will check to see if there are any unread news articles to read before we upgrade
+    - name: clone informant
       git:
-        repo: https://aur.archlinux.org/kwalletcli.git
-        dest: /usr/src/kwalletcli
+        repo: https://aur.archlinux.org/informant.git
+        dest: /usr/src/informant
         update: no
       tags:
-        - kwalletcli
+        - informant
 
-    - name: make powerlevel10k source code available to me (dylanh user)
+    - name: make informant source code available to me (dylanh user)
       file:
-        path: /usr/src/kwalletcli
+        path: /usr/src/informant
         group: wheel
         mode: '0775'
       tags:
-        - kwalletcli
+        - informant
 
-    - name: Build and install powerlevel10k
-      command: chdir=/usr/src/kwalletcli makepkg -sirc --noconfirm
+    - name: Build and install informant
+      command: chdir=/usr/src/informant makepkg -sirc --noconfirm
       become: true
       become_user: dylanh
       tags:
-        - kwalletcli
+        - informant
 
 # some general stuff
 

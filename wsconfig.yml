@@ -32,6 +32,8 @@
         - .terraform
         - .tmux
         - .vim
+        - .config/nvim
+        - .config/nvim/plugins
         - .virtualenvs
         - .zsh
       tags:
@@ -111,6 +113,8 @@
       become_user: dylanh
       tags:
         - zsh
+
+    - name: zsh functions
 
     - name: Cloning oh-my-zsh
       git:
@@ -327,7 +331,13 @@
       tags:
         - bluetooth
 
-# TODO some way of patching , perhaps with patch the vcs.zsh file of zsh-themes-powerlevel9k specifically the function that decides if svn working copies are dirty
-# This is the function that runs svn status on an svn working copy for each enter press and when working on remote repos (which is most svn working copies) results
-# in a metric shit ton of lag. I'd rather do without the "dirty" notification in the prompt, and just have a responsive command line
-# This could all be made moot by powerlevel10k which purports to run things like this asynchronously: https://www.reddit.com/r/zsh/comments/ay6ny7/powerlevel10k_goes_instant_50_times_faster_than/
+# neovim configuration
+    - name: install neovim config
+      copy:
+        src: "files/neovim/init.vim"
+        dest: "{{ userdir }}/.config/nvim/init.vim"
+
+    - name: WARNING
+      debug:
+        msg: "You'll need to run :PlugInstall in neovim to have it install all the plugins. See https://github.com/junegunn/vim-plug#commands"
+
