@@ -22,6 +22,7 @@
       with_items: 
         - development
         - Documents
+        - Documents/Music
         - Downloads
         - Pictures
         - svn

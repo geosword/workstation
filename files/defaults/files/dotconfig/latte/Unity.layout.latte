@@ -9,7 +9,7 @@ activityId=
 formfactor=2
 immutability=1
 lastScreen=-1
-location=3
+location=4
 plugin=org.kde.plasma.private.systemtray
 wallpaperplugin=org.kde.image
 
@@ -36,6 +36,9 @@ plugin=org.kde.plasma.devicenotifier
 immutability=1
 plugin=org.kde.plasma.notifications
 
+[Containments][11][Applets][16][Configuration]
+PreloadWeight=0
+
 [Containments][11][Applets][17]
 immutability=1
 plugin=org.kde.plasma.printmanager
@@ -57,6 +60,9 @@ plugin=org.kde.plasma.networkmanagement
 [Containments][11][Applets][22]
 immutability=1
 plugin=org.kde.plasma.bluetooth
+
+[Containments][11][Applets][22][Configuration]
+PreloadWeight=0
 
 [Containments][11][Applets][26][Configuration]
 PreloadWeight=42
@@ -91,6 +97,10 @@ DialogWidth=720
 immutability=1
 plugin=org.kde.plasma.nightcolorcontrol
 
+[Containments][11][Applets][31]
+immutability=1
+plugin=org.kde.plasma.mediacontroller
+
 [Containments][11][Applets][58]
 immutability=1
 plugin=org.kde.discovernotifier
@@ -112,7 +122,7 @@ formfactor=2
 immutability=1
 isPreferredForShortcuts=false
 lastScreen=-1
-location=3
+location=4
 onPrimary=true
 plugin=org.kde.latte.containment
 raiseOnActivityChange=false
@@ -129,22 +139,15 @@ immutability=1
 plugin=org.kde.plasma.systemtray
 
 [Containments][4][Applets][10][Configuration]
-PreloadWeight=65
+PreloadWeight=57
 SystrayContainmentId=11
-
-[Containments][4][Applets][24]
-immutability=1
-plugin=org.kde.plasma.userswitcher
-
-[Containments][4][Applets][24][Configuration]
-PreloadWeight=55
 
 [Containments][4][Applets][25]
 immutability=1
 plugin=org.kde.plasma.digitalclock
 
 [Containments][4][Applets][25][Configuration]
-PreloadWeight=60
+PreloadWeight=52
 
 [Containments][4][Applets][25][Configuration][Appearance]
 displayTimezoneAsCode=false
@@ -161,14 +164,17 @@ immutability=1
 plugin=org.kde.plasma.calculator
 
 [Containments][4][Applets][29][Configuration]
-PreloadWeight=55
+PreloadWeight=52
 
 [Containments][4][Applets][29][Configuration][ConfigDialog]
 DialogHeight=540
 DialogWidth=720
 
 [Containments][4][Applets][29][Shortcuts]
-global=Meta+Shift+C
+global=Alt+Shift+C
+
+[Containments][4][Applets][31][Configuration]
+PreloadWeight=42
 
 [Containments][4][Applets][8]
 immutability=1
@@ -182,7 +188,7 @@ favorites=preferred://browser,systemsettings.desktop,org.kde.dolphin.desktop,org
 favoritesPortedToKAstats=true
 
 [Containments][4][ConfigDialog]
-DialogHeight=858
+DialogHeight=980
 DialogWidth=539
 
 [Containments][4][General]
@@ -190,10 +196,11 @@ advanced=false
 animationLauncherBouncing=false
 animationWindowAddedInGroup=false
 animationWindowInAttention=false
-appletOrder=8;24;25;29;10
+appletOrder=25;8;29;10
 autoDecreaseIconSize=false
 dragActiveWindowEnabled=true
 iconSize=24
+inConfigureAppletsMode=true
 panelPosition=10
 panelSize=100
 plasmaBackgroundForPopups=true
@@ -204,7 +211,7 @@ showOnlyCurrentActivity=false
 showOnlyCurrentDesktop=true
 shrinkThickMargins=true
 splitterPosition=2
-splitterPosition2=4
+splitterPosition2=3
 titleTooltips=false
 zoomLevel=0
 
@@ -218,7 +225,7 @@ type=org.kde.latte.default
 [LayoutSettings]
 background=
 color=orange
-lastUsedActivity=6404389b-ca0a-4b35-ac27-4be85bbb3354
+lastUsedActivity=45b589db-a62b-4481-8a9f-7affaa4ffd3f
 launchers=
 preferredForShortcutsTouched=false
 showInMenu=true

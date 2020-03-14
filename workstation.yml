@@ -68,6 +68,7 @@
       with_items:
 # basic stuff
         - ansible
+        - ark
         - awesome-terminal-fonts
         - aws-cli
         - base-devel
