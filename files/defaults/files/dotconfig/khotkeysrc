@@ -964,7 +964,7 @@ Type=SIMPLE_ACTION_DATA
 ActionsCount=1
 
 [Data_4_12Actions0]
-CommandURL=/home/dylanh/.tools/reloadhotkeys.sh
+CommandURL=/home/dylanh/.tools/reloadthings.sh
 Type=COMMAND_URL
 
 [Data_4_12Conditions]

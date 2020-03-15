@@ -5,6 +5,7 @@ RightButton;NoModifier=org.kde.latte.contextmenu
 launchers59=applications:firefox.desktop
 
 [Containments][11]
+PreloadWeight=34
 activityId=
 formfactor=2
 immutability=1
@@ -26,11 +27,14 @@ immutability=1
 plugin=org.kde.plasma.volume
 
 [Containments][11][Applets][14][Configuration]
-PreloadWeight=55
+PreloadWeight=39
 
 [Containments][11][Applets][15]
 immutability=1
 plugin=org.kde.plasma.devicenotifier
+
+[Containments][11][Applets][15][Configuration]
+PreloadWeight=34
 
 [Containments][11][Applets][16]
 immutability=1
@@ -75,7 +79,7 @@ immutability=1
 plugin=org.kde.plasma.weather
 
 [Containments][11][Applets][28][Configuration]
-PreloadWeight=55
+PreloadWeight=39
 pressureUnit=5028
 showHumidityInTooltip=false
 showPressureInTooltip=false
@@ -97,9 +101,15 @@ DialogWidth=720
 immutability=1
 plugin=org.kde.plasma.nightcolorcontrol
 
+[Containments][11][Applets][30][Configuration]
+PreloadWeight=34
+
 [Containments][11][Applets][31]
 immutability=1
 plugin=org.kde.plasma.mediacontroller
+
+[Containments][11][Applets][31][Configuration]
+PreloadWeight=34
 
 [Containments][11][Applets][58]
 immutability=1
@@ -139,7 +149,7 @@ immutability=1
 plugin=org.kde.plasma.systemtray
 
 [Containments][4][Applets][10][Configuration]
-PreloadWeight=57
+PreloadWeight=49
 SystrayContainmentId=11
 
 [Containments][4][Applets][25]
@@ -147,7 +157,7 @@ immutability=1
 plugin=org.kde.plasma.digitalclock
 
 [Containments][4][Applets][25][Configuration]
-PreloadWeight=52
+PreloadWeight=44
 
 [Containments][4][Applets][25][Configuration][Appearance]
 displayTimezoneAsCode=false
@@ -164,7 +174,7 @@ immutability=1
 plugin=org.kde.plasma.calculator
 
 [Containments][4][Applets][29][Configuration]
-PreloadWeight=52
+PreloadWeight=44
 
 [Containments][4][Applets][29][Configuration][ConfigDialog]
 DialogHeight=540
@@ -176,12 +186,22 @@ global=Alt+Shift+C
 [Containments][4][Applets][31][Configuration]
 PreloadWeight=42
 
+[Containments][4][Applets][32]
+immutability=1
+plugin=org.kde.latte.plasmoid
+
+[Containments][4][Applets][32][Configuration]
+PreloadWeight=42
+
+[Containments][4][Applets][32][Configuration][General]
+isInLatteDock=true
+
 [Containments][4][Applets][8]
 immutability=1
 plugin=org.kde.plasma.kickoff
 
 [Containments][4][Applets][8][Configuration]
-PreloadWeight=100
+PreloadWeight=97
 
 [Containments][4][Applets][8][Configuration][General]
 favorites=preferred://browser,systemsettings.desktop,org.kde.dolphin.desktop,org.kde.kate.desktop,org.kde.discover.desktop
@@ -191,16 +211,18 @@ favoritesPortedToKAstats=true
 DialogHeight=980
 DialogWidth=539
 
+[Containments][4][Configuration]
+PreloadWeight=34
+
 [Containments][4][General]
 advanced=false
 animationLauncherBouncing=false
 animationWindowAddedInGroup=false
 animationWindowInAttention=false
-appletOrder=25;8;29;10
+appletOrder=25;8;32;29;10
 autoDecreaseIconSize=false
 dragActiveWindowEnabled=true
 iconSize=24
-inConfigureAppletsMode=true
 panelPosition=10
 panelSize=100
 plasmaBackgroundForPopups=true
@@ -210,8 +232,8 @@ shadows=None
 showOnlyCurrentActivity=false
 showOnlyCurrentDesktop=true
 shrinkThickMargins=true
-splitterPosition=2
-splitterPosition2=3
+splitterPosition=3
+splitterPosition2=4
 titleTooltips=false
 zoomLevel=0
 
