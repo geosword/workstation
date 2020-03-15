@@ -1,3 +1,4 @@
+# vim:filetype=yaml.ansible
 # this MUST be run as root, so that it can create the non priviledged user.
 # VARS - take network config so we can specify things like search domain.
 
@@ -12,7 +13,7 @@
 
 # TODO check the date on /var/lib/pacman/sync/core.db, if its today, skip the synchronisation
     - name: Synchronise the package databases
-      raw : /usr/bin/pacman -Syy
+      raw: /usr/bin/pacman -Syy
 
     - name: install python if its not there.
       raw: /usr/bin/pacman -S --noconfirm python2
@@ -68,7 +69,10 @@
       with_items:
 # basic stuff
         - ansible
+        - ansible-lint
         - ark
+# autopep is for python linting
+        - autopep8
         - awesome-terminal-fonts
         - aws-cli
         - base-devel
@@ -125,9 +129,12 @@
         - pulseaudio-bluetooth
         - pwgen
         - python2
-        - python-virtualenv
-        - python-virtualenvwrapper
+        - python2-autopep8
+        - python2-pylint
         - python2-virtualenv
+        - python-virtualenv
+        - python-pylint
+        - python-virtualenvwrapper
         - rdesktop
         - rdiff-backup
         - riot-desktop
@@ -149,6 +156,7 @@
         - xorg
         - xorg-xinit
         - xsel
+        - yamllint
         - youtube-dl
 # zathura is a minimal pdf viewer with vim keybindings. https://wiki.archlinux.org/index.php/Zathura
         - zathura

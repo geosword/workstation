@@ -1,4 +1,4 @@
-
+# vim:filetype=yaml.ansible
 # Currently it handles three specific files of plasma, but could also manage tmux, vim or anything else we can resonably control
 # with config files
 
@@ -49,9 +49,9 @@
       tags:
         - gitconfig
 
-    - name: reload hotkeys script
+    - name: reload things (including hotkeys) script
       copy:
-        src: files/defaults/files/tools/reloadhotkeys.sh
+        src: files/defaults/files/tools/reloadthings.sh
         dest: "{{ userdir }}/.tools/"
         mode: "0770"
       become: true
