@@ -1,3 +1,4 @@
+---
 # vim:filetype=yaml.ansible
 # this MUST be run as root, so that it can create the non priviledged user.
 # VARS - take network config so we can specify things like search domain.
@@ -62,7 +63,7 @@
 # install a bunch of stuff
 # TODO When we want to install new packages IT MUST go here, however there is a lot of stuff in here
 # That we either dont want or dont need to run at the same time, so perhaps seperate out the installation
-# of packages to a different play, or put it in the wsconfig play, but only run the required tasks when a variable is 
+# of packages to a different play, or put it in the wsconfig play, but only run the required tasks when a variable is
 # set e.g. installpackages=true
     - name: install a bunch of stuff # noqa 301
       command: "/usr/bin/pacman -S --noconfirm {{ item }}"
@@ -94,6 +95,7 @@
         - gst-plugins-ugly
 # fakeroot is needed for makepkg which is needed to install google-chrome and other stuff in the AUR
         - fakeroot
+        - flake8
         - firefox
 # Ghostscript is needed for printing to work.
         - ghostscript
@@ -132,8 +134,8 @@
         - python2-autopep8
         - python2-pylint
         - python2-virtualenv
-        - python-virtualenv
         - python-pylint
+        - python-virtualenv
         - python-virtualenvwrapper
         - rdesktop
         - rdiff-backup
@@ -497,7 +499,7 @@
         - installchrome
 
     - name: make google-chrome source code available to me (dylanh user)
-      file: 
+      file:
         path: /usr/src/google-chrome
         group: wheel
         mode: '0775'

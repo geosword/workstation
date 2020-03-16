@@ -2,12 +2,29 @@ set number
 
 " Only run linters named in ale_linters settings.
 let g:ale_linters_explicit = 1
+" ALEFixers
+let g:ale_fixers = {
+\   '*': ['remove_trailing_lines', 'trim_whitespace'],
+\}
+let g:ale_fix_on_save = 1
+
+" ALELinters - Tried putting these in the ftdetect files like the
+" documentation suggests, but found that I could add up to two, before the
+" third stopped working. so here we are setting them 'globally' per filetype
+let g:ale_linters = {
+\   'yaml': ['yamllint','ansible-lint'],
+\   'python': ['pylint'],
+\   'puppet': ['puppetlint'],
+\}
+" NOTE: If you are ever setting linter arguments, you might need to experiment
+" with g: vs b: b: works for the yaml linter, but had to use g: for puppet
 
 call plug#begin('~/.config/nvim/plugins')
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 " we need fugitive for git integration in airline
 Plug 'https://github.com/tpope/vim-fugitive.git'
+Plug 'https://github.com/rodjek/vim-puppet.git'
 Plug 'dense-analysis/ale'
 Plug 'pearofducks/ansible-vim'
 call plug#end()
@@ -25,8 +42,8 @@ let g:airline_theme='powerlineish'
 set autoindent noexpandtab softtabstop=2 tabstop=2 shiftwidth=2
 " we ALWAYS want unix line endings
 set fileformat=unix
-" disable Ex mode, we have no use for it
-map q: <Nop>
+" disable  mode, we have no use for it
+map q <Nop>
 nnoremap Q <nop>
 
 " https://superuser.com/questions/410982/in-vim-how-can-i-quickly-switch-between-tabs
