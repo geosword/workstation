@@ -12,7 +12,7 @@
       register: pythoninstalled
 
 # TODO check the date on /var/lib/pacman/sync/core.db, if its today, skip the synchronisation
-    - name: Synchronise the package databases
+    - name: Synchronise the package databases  # noqa 301
       raw: /usr/bin/pacman -Syy
 
     - name: install python if its not there.
@@ -43,10 +43,10 @@
       tags: packages
 
     - name: Synchronise the package databases
-      command: /usr/bin/pacman -Syy
+      command: /usr/bin/pacman -Syy # noqa 301
       tags: sync-packages
 
-    - name: Refresh the pacman-keys
+    - name: Refresh the pacman-keys # noqa 301
       command: /usr/bin/pacman-key --refresh-keys
       tags: sync-packages
 
@@ -64,7 +64,7 @@
 # That we either dont want or dont need to run at the same time, so perhaps seperate out the installation
 # of packages to a different play, or put it in the wsconfig play, but only run the required tasks when a variable is 
 # set e.g. installpackages=true
-    - name: install a bunch of stuff
+    - name: install a bunch of stuff # noqa 301
       command: "/usr/bin/pacman -S --noconfirm {{ item }}"
       with_items:
 # basic stuff
@@ -215,7 +215,7 @@
 
 # install kubectl. we dont use get_url here because its doing a secondary call to find out the current stable release
 # for some reason using the file module to set the permissions just didnt work. It would set the directory and group, but not "other"
-    - name: install kubectl
+    - name: install kubectl # noqa 303
       shell:
         cmd: "curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && chmod 775 /usr/local/sbin/kubectl"
         chdir: "/usr/local/sbin/"
@@ -559,6 +559,29 @@
       tags:
         - informant
 
+# Install puppet-lint
+    - name: clone puppet-lint
+      git:
+        repo: https://aur.archlinux.org/puppet-lint.git
+        dest: /usr/src/puppet-lint
+        update: no
+      tags:
+        - puppet-lint
+
+    - name: make puppet-lint source code available to me (dylanh user)
+      file:
+        path: /usr/src/puppet-lint
+        group: wheel
+        mode: '0775'
+      tags:
+        - puppet-lint
+
+    - name: Build and install puppet-lint
+      command: chdir=/usr/src/puppet-lint makepkg -sirc --noconfirm
+      become: true
+      become_user: dylanh
+      tags:
+        - puppet-lint
 # some general stuff
 
     - name: remove autologin config
