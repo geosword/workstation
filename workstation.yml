@@ -33,7 +33,7 @@
       get_url:
         url: "https://www.archlinux.org/mirrorlist/?country=GB&country=DE&country=US&protocol=http&protocol=https&ip_version=4&use_mirror_status=on"
         dest: "/etc/pacman.d/mirrorlist"
-        force: yes
+        force: true
       tags: packages
 
     - name: "uncomment `#Server` in pacman mirror list"
@@ -72,8 +72,6 @@
         - ansible
         - ansible-lint
         - ark
-# autopep is for python linting
-        - autopep8
         - awesome-terminal-fonts
         - aws-cli
         - base-devel
@@ -131,9 +129,10 @@
         - pulseaudio-bluetooth
         - pwgen
         - python2
-        - python2-autopep8
+        - python2-pip
         - python2-pylint
         - python2-virtualenv
+        - python-pip
         - python-pylint
         - python-virtualenv
         - python-virtualenvwrapper
@@ -222,7 +221,7 @@
         cmd: "curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && chmod 775 /usr/local/sbin/kubectl"
         chdir: "/usr/local/sbin/"
         creates: "/usr/local/sbin/kubectl"
-      become: yes
+      become: true
       tags:
         - installkubectl
 
@@ -231,7 +230,7 @@
       systemd:
         name: bluetooth.service
         state: started
-        enabled: yes
+        enabled: true
       tags:
         - bluetooth
 
@@ -239,7 +238,7 @@
       systemd:
         name: org.cups.cupsd.service
         state: started
-        enabled: yes
+        enabled: true
       tags:
         - cups
 
@@ -248,7 +247,7 @@
       git:
         repo: https://aur.archlinux.org/snapd.git
         dest: /usr/src/snapd
-        update: no
+        update: false
       tags:
         - installsnap
 
@@ -271,7 +270,7 @@
       systemd:
         name: apparmor
         state: started
-        enabled: yes
+        enabled: true
       tags:
         - installsnap
 
@@ -279,7 +278,7 @@
       systemd:
         name: snapd.socket
         state: started
-        enabled: yes
+        enabled: true
       tags:
         - installsnap
 
@@ -295,7 +294,7 @@
     - name: enable parallel snaps (install multiple versions of the same package) We do this for helm2 and helm3
       shell:
         cmd: "/usr/bin/snap set system experimental.parallel-instances=true"
-      become: yes
+      become: true
       tags:
         - installsnap
 
@@ -304,7 +303,7 @@
       snap:
         name: helm
         channel: 2.16/stable
-        classic: yes
+        classic: true
       tags:
         - installhelm
 
@@ -321,7 +320,7 @@
     - name: install helm 3 from snap
       snap:
         name: helm
-        classic: yes
+        classic: true
       tags:
         - installhelm
 
@@ -345,7 +344,7 @@
     - name: install sublime from snap
       snap:
         name: sublime-text
-        classic: yes
+        classic: true
 
 # we going to use systemd-resolved against my better judgement
     - name: replace /etc/resolv.conf with a link to system-resolved configuration
@@ -353,7 +352,7 @@
         src: /run/systemd/resolve/stub-resolv.conf
         dest: /etc/resolv.conf
         state: link
-        force: yes
+        force: true
 
     - name: set the keyboard layout to UK
       copy:
@@ -494,7 +493,7 @@
       git:
         repo: https://aur.archlinux.org/google-chrome.git
         dest: /usr/src/google-chrome
-        update: no
+        update: true
       tags:
         - installchrome
 
@@ -518,7 +517,7 @@
       git:
         repo: https://aur.archlinux.org/zsh-theme-powerlevel10k-git.git
         dest: /usr/src/zsh-theme-powerlevel10k-git
-        update: no
+        update: true
       tags:
         - powerlevel10k
 
@@ -542,7 +541,7 @@
       git:
         repo: https://aur.archlinux.org/informant.git
         dest: /usr/src/informant
-        update: no
+        update: true
       tags:
         - informant
 
@@ -566,7 +565,7 @@
       git:
         repo: https://aur.archlinux.org/puppet-lint.git
         dest: /usr/src/puppet-lint
-        update: no
+        update: true
       tags:
         - puppet-lint
 
@@ -630,6 +629,24 @@
         - (inventory_hostname == 'geosword')
       tags:
         - backupscripts
+
+# TODO something to remind you to update weekly pacman?
+    - name: backup home cronjob
+      cron:
+        name: backup home
+        minute: 0
+        hour: 5
+        # 1,4 means run on Monday and Thursday. Twice seems like a good cadence for no particular reason
+        weekday: "1,4"
+        job: "/usr/bin/pacman -Syy"
+        user: root
+      tags:
+        - pacman
+
+# pip install msgpack (for deoplete autocompletion in neovim)
+    - name: install msgpack for deoplete - used for autocompletion in vim
+      pip:
+        name: msgpack
 
     - name: message
       debug:
