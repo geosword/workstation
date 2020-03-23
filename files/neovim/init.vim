@@ -37,6 +37,8 @@ Plug 'psf/black', { 'commit': 'ce14fa8b497bae2b50ec48b3bd7022573a59cdb1' }
 " ale syntax checking framework
 Plug 'dense-analysis/ale'
 Plug 'pearofducks/ansible-vim'
+Plug 'towolf/vim-helm'
+Plug 'scrooloose/nerdtree'
 call plug#end()
 set cursorline                          " put a horizontal line on the line where the cursor is
 

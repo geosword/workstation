@@ -885,7 +885,7 @@ Type=GESTURE
 
 [Data_4]
 Comment=Comment
-DataCount=15
+DataCount=16
 Enabled=true
 ImportId[$d]
 Name=Dylans
@@ -1057,6 +1057,32 @@ TriggersCount=1
 Key=Alt+Shift+L
 Type=SHORTCUT
 Uuid={9b6e5340-0398-4ade-832d-f1ff15e5daa4}
+
+[Data_4_16]
+Comment=Comment
+Enabled=true
+Name=zathura pdf
+Type=SIMPLE_ACTION_DATA
+
+[Data_4_16Actions]
+ActionsCount=1
+
+[Data_4_16Actions0]
+CommandURL=/home/dylanh/.tools/switchto/switchto.py -c org.pwmt.zathura.Zathura -e "/usr/bin/zathura"
+Type=COMMAND_URL
+
+[Data_4_16Conditions]
+Comment=
+ConditionsCount=0
+
+[Data_4_16Triggers]
+Comment=Simple_action
+TriggersCount=1
+
+[Data_4_16Triggers0]
+Key=Alt+Shift+F
+Type=SHORTCUT
+Uuid={847d6b55-d18a-490a-9174-a85fd56ad80f}
 
 [Data_4_1Actions]
 ActionsCount=1
