@@ -2,6 +2,9 @@
 # vim:filetype=yaml.ansible
 # this MUST be run as root, so that it can create the non priviledged user.
 # VARS - take network config so we can specify things like search domain.
+#
+# Make this into roles. e.g. an ansible role, a terraform role, a docker role and so on. That way you can re-use and more easily configure
+# exactly what features your workstation has
 
 - hosts: all
   gather_facts: false
@@ -174,6 +177,14 @@
         replace: 'nocows=1'
       tags:
         - disablecowsay
+
+    - name: Disable host key checking too
+      replace:
+        dest: "/etc/ansible/ansible.cfg"
+        regexp: '^#host_key_checking = False'
+        replace: 'host_key_checking = False'
+      tags:
+        - disablehostkeychecking
 
 ## create the group for the non privileged user
     - name: create group
@@ -629,6 +640,18 @@
         - (inventory_hostname == 'geosword')
       tags:
         - backupscripts
+
+    - name: enable & start iptables
+      systemd:
+        name: iptables
+        enabled: true
+        state: started
+
+    - name: enable & start docker
+      systemd:
+        name: docker
+        enabled: true
+        state: started
 
 # TODO something to remind you to update weekly pacman?
     - name: backup home cronjob

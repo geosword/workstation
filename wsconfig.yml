@@ -25,9 +25,10 @@
         - Documents/Music
         - Downloads
         - Pictures
-        - svn
-        - .tools
         - temp
+        - svn
+        - .aws
+        - .tools
         - .kube
         - .ssh
         - .terraform
