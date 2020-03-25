@@ -1,9 +1,30 @@
-# This is a wrapper for terraform. The main idea is to get it to check for and load if appropraite certain environment variables
-# required for running in the sectigo environment.
-if [[ -z "$CONSUL_HTTP_TOKEN" ]]; then
-	# If the consul token isnt there, it assumes the username and password will not be either.
-	# we need to decrypt our authentication file so we can create the env vars in it
-	export $(gpg -d ~/.terraform/adc.gpg 2>/dev/null | xargs)
+# This is a wrapper for terraform. The main idea is to get it to check for and load if appropriate certain environment variables
+# required for running with certain git repos. By Default, it checks for a "credentials" file in TFCREDSLOCATION. The name of the file
+# is the name of the git repo. NOTE IT DOES NOT take the namespace / organisation into account, so you might run into trouble if you ever
+# encounter org1/repo1.git AND org2/repo1.git
+
+TFCREDSLOCATION="${HOME}/.terraform"
+# To make a credentials file, create a file in TFCREDSLOCATION (remember to leave OFF .gpg) which sets environment variables. e.g.
+# CONSUL_HTTP_TOKEN=sdfghsdfsdfsdgsg
+# ...Plus any other environment you might need, BTW terraform will use environment variables to populate variables in its variables.tf
+# assuming they are the following format:
+# TF_VAR_variable_name="somevalue"
+# Once you have created your credentials file, use gpg to encrypt it with
+# $ gpg -c <credential filename>
+# Enter a suitably strong passphrase that only you know
+# You will then be left with your original (which you should delete) and the encrypted version (.gpg extension). The encrypted file will be read assuming its there
+# And if its the first time you've run it, will ask you for the passphrase you used to encrypt it with. Enter that, and the file contents will be fed into export,
+# Which will result in your environment variables being set.
+
+TFCREDSFILE=$(git remote -v 2>/dev/null | awk '{print $2}' | head -n 1 | grep -Eo "[0-9a-zA-Z\-]+\.git")
+# TFCREDSFILE should now hold either the git repo name OR NOTHING
+
+if [ ! -z "${TFCREDSFILE}" ]; then
+	if [ -f "${TFCREDSLOCATION}/${TFCREDSFILE}.gpg" ]; then
+		# If the consul token isnt there, it assumes the username and password will not be either.
+		# we need to decrypt our authentication file so we can create the env vars in it
+		export $(gpg -d ${TFCREDSLOCATION}/${TFCREDSFILE}.gpg 2>/dev/null | xargs)
+	fi
 fi
 
 # We need to use the FQP for terraform, otherwise the function calls itself

@@ -151,6 +151,7 @@
         - terraform
         - tmux
         - traceroute
+        - unzip
         - vim
         - vlc
         - wget
@@ -236,6 +237,14 @@
       tags:
         - installkubectl
 
+    - name: install tflint # noqa 303
+      shell:
+        cmd: "curl -L $(curl -Ls https://api.github.com/repos/terraform-linters/tflint/releases/latest | grep -o -E 'https://.+?_linux_amd64.zip') -o tflint.zip && unzip tflint.zip && rm /usr/local/sbin/tflint.zip"
+        chdir: "/usr/local/sbin/"
+        creates: "/usr/local/sbin/tflint"
+      become: true
+      tags:
+        - installtflint
 
     - name: enable cups for printing. This starts the socket, so if we access cups it will start it
       systemd:
@@ -570,6 +579,40 @@
       become_user: dylanh
       tags:
         - informant
+
+# Install kernel-modules-hook which will take a backup of the existing /lib/modules folder before the kernel gets upgraded.
+# Means you dont need to reboot after each kernel upgrade to modprobe
+    - name: clone kernel-modules-hook
+      git:
+        repo: https://aur.archlinux.org/kernel-modules-hook.git
+        dest: /usr/src/kernel-modules-hook
+        update: true
+      tags:
+        - kmh
+
+    - name: make informant source code available to me (dylanh user)
+      file:
+        path: /usr/src/kernel-modules-hook
+        group: wheel
+        mode: '0775'
+      tags:
+        - kmh
+
+    - name: Build and install informant
+      command: chdir=/usr/src/kernel-modules-hook makepkg -sirc --noconfirm
+      become: true
+      become_user: dylanh
+      tags:
+        - kmh
+
+    - name: enable the kernel-module-hook service
+      systemd:
+        name: linux-modules-cleanup
+        state: started
+        enable: true
+        reload: true
+      tags:
+        - kmh
 
 # Install puppet-lint
     - name: clone puppet-lint

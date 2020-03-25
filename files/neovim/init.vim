@@ -5,6 +5,7 @@ let g:ale_linters_explicit = 1
 " ALEFixers
 let g:ale_fixers = {
 \   '*': ['remove_trailing_lines', 'trim_whitespace'],
+\   'terraform': ['terraform'],
 \}
 let g:ale_fix_on_save = 1
 
@@ -15,6 +16,7 @@ let g:ale_linters = {
 \   'yaml': ['yamllint','ansible-lint'],
 \   'python': ['pylint'],
 \   'puppet': ['puppetlint'],
+\   'terraform': ['terraform', 'tflint'],
 \}
 
 " NOTE: If you are ever setting linter arguments, use g: not b:
@@ -39,6 +41,9 @@ Plug 'dense-analysis/ale'
 Plug 'pearofducks/ansible-vim'
 Plug 'towolf/vim-helm'
 Plug 'scrooloose/nerdtree'
+" terraform autocompletion
+Plug 'juliosueiras/vim-terraform-completion'
+Plug 'hashivim/vim-terraform'
 call plug#end()
 set cursorline                          " put a horizontal line on the line where the cursor is
 
@@ -84,3 +89,13 @@ nnoremap <space> :
 set listchars=tab:……,trail:~,extends:>,precedes:<
 " Show tabs and EOL characters
 set list
+
+" Not sure this actually does anything
+let g:deoplete#omni_patterns = {}
+
+call deoplete#custom#option('omni_patterns', {
+\ 'complete_method': 'omnifunc',
+\ 'terraform': '[^ *\t"{=$]\w*',
+\})
+
+call deoplete#initialize()
