@@ -89,7 +89,7 @@
       copy:
         src: files/tmux/copypwd.sh
         dest: "{{ userdir }}/.tmux/copypwd.sh"
-      become: yes
+      become: true
       become_user: dylanh
       tags:
         - tmux
