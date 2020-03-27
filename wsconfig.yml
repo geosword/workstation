@@ -85,6 +85,16 @@
       tags:
         - tmuxsplit
 
+    - name: copy the copypwd script to tmux
+      copy:
+        src: files/tmux/copypwd.sh
+        dest: "{{ userdir }}/.tmux/copypwd.sh"
+      become: yes
+      become_user: dylanh
+      tags:
+        - tmux
+
+
 # zsh and oh my zsh configuration
 
     - name: install zshrc

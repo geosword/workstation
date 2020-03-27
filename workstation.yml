@@ -98,6 +98,8 @@
         - fakeroot
         - flake8
         - firefox
+# fzf is a fuzzy file searcher which is awesome and Ive only touched the surface of
+        - fzf
 # Ghostscript is needed for printing to work.
         - ghostscript
         - git
