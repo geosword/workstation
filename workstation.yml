@@ -312,56 +312,6 @@
       tags:
         - installsnap
 
-
-    - name: enable parallel snaps (install multiple versions of the same package) We do this for helm2 and helm3
-      shell:
-        cmd: "/usr/bin/snap set system experimental.parallel-instances=true"
-      become: true
-      tags:
-        - installsnap
-
-#  Install helm 2 from snap
-    - name: install helm 2 from snap
-      snap:
-        name: helm
-        channel: 2.16/stable
-        classic: true
-      tags:
-        - installhelm
-
-    - name: link helm 2 from the snaps folder to somewhere usefull
-      file:
-        src: /var/lib/snapd/snap/helm/current/helm
-        dest: /usr/local/sbin/helm2
-        state: link
-      tags:
-        - installhelm
-
-
-#  Install helm 3 from snap
-    - name: install helm 3 from snap
-      snap:
-        name: helm
-        classic: true
-      tags:
-        - installhelm
-
-    - name: link helm 3 from the snaps folder to somewhere usefull
-      file:
-        src: /var/lib/snapd/snap/helm_3/current/helm
-        dest: /usr/local/sbin/helm3
-        state: link
-      tags:
-        - installhelm
-
-# remove the helm link from /var/lib/snapd/snap/bin/ so that we cant run helm without specifying a version.
-    - name: remove snap helm link
-      file:
-        path: /var/lib/snapd/snap/bin/helm
-        state: absent
-      tags:
-        - installhelm
-
 #  Install sublime text
     - name: install sublime from snap
       snap:
@@ -557,6 +507,55 @@
       become_user: dylanh
       tags:
         - powerlevel10k
+
+# Install Helm3
+    - name: clone helm3
+      git:
+        repo: https://aur.archlinux.org/kubernetes-helm.git
+        dest: /usr/src/helm3
+        update: true
+      tags:
+        - helm3
+
+    - name: make helm3 source code available to me (dylanh user)
+      file:
+        path: /usr/src/helm3
+        group: wheel
+        mode: '0775'
+      tags:
+        - helm3
+
+    - name: Build and install helm3
+      command: chdir=/usr/src/helm3 makepkg -sirc --noconfirm
+      become: true
+      become_user: dylanh
+      tags:
+        - helm3
+
+    - name: Change the name of the helm3 binary to be helm3 so we have to specify a version when calling
+      command: mv /usr/bin/helm /usr/bin/helm3
+      tags:
+        - helm3
+
+# Install Helm2
+
+    - name: download helm2 manually, because we cant install helm3 and helm2 at the same time using AUR
+      shell:
+        cmd: |
+          curl https://get.helm.sh/helm-$(curl -s https://api.github.com/repos/helm/helm/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')-linux-amd64.tar.gz -o /var/tmp/helm2-linux-amd64.tar.gz
+        creates: "/var/tmp/helm2-linux-amd64.tar.gz"
+      tags:
+        - helm2
+
+    - name: extract helm2 to somewhere in the path
+      command: "tar -zxvf /var/tmp/helm2-linux-amd64.tar.gz -C /usr/local/sbin/ --strip-components=1"
+      tags:
+        - helm2
+
+    - name: Change the name of the helm2 binary to be helm2 so we have to specify a version when calling
+      command: mv /usr/local/sbin/helm /usr/local/sbin/helm2
+      tags:
+        - helm2
 
 # Install informant that will check to see if there are any unread news articles to read before we upgrade
     - name: clone informant
