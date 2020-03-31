@@ -248,7 +248,15 @@
       tags:
         - installtflint
 
-    - name: enable cups for printing. This starts the socket, so if we access cups it will start it
+    - name: enable cronie
+      systemd:
+        name: cronie.service
+        state: started
+        enabled: true
+      tags:
+        - cronie
+
+    - name: enable bluetooth
       systemd:
         name: bluetooth.service
         state: started

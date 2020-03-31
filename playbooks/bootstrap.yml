@@ -35,7 +35,7 @@
       register: efivars
 
     - name: This will fail if the efivars are not available. Did you boot with efi using an efi enabled system (you have to set this specifically in virtualbox)
-      fail: 
+      fail:
         msg: Did you boot with efi using an efi enabled system (you have to set this specifically in virtualbox)
       when: not efivars.stat.exists
 
@@ -54,7 +54,6 @@
         - run
         - sys
         - efi
-        - 
 
 #    - name: remove all partitions on the device
 #      command: "dd if=/dev/zero of={{ primaryDisk }} bs=512 count=1"
@@ -150,7 +149,7 @@
         dest: /mnt/etc/vconsole.conf
         content: "KEYMAP=uk"
 
-    #-CHANGE THIS TO SET THE HOSTNAME ACCORDING TO SOMETHING ELSE MAC? 
+    #-CHANGE THIS TO SET THE HOSTNAME ACCORDING TO SOMETHING ELSE MAC?
     - name: set the hostname
       copy:
         dest: /mnt/etc/hostname
@@ -175,7 +174,7 @@
         state: mounted
 
     - name: copy the dns config from system rescue to the chroot
-      copy: 
+      copy:
         src: /etc/resolv.conf
         dest: /mnt/etc/resolv.conf
         remote_src: yes
@@ -210,7 +209,7 @@
     - name: install stuff that isnt already in the root image, because thats what root images are for... installing vital stuff that you need. Duh!
       shell: chroot /mnt/ /bin/bash -c "/usr/bin/pacman -S --noconfirm base linux linux-firmware"
 
-    # Appears that grub-mkconfig uses sed to create the config. So sed is needed too 
+    # Appears that grub-mkconfig uses sed to create the config. So sed is needed too
     - name: install grub binaries within the chroot
       shell: chroot /mnt/ /bin/bash -c "/usr/bin/pacman -S --noconfirm grub sed efibootmgr"
 
@@ -272,7 +271,7 @@
         content: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDKdO7SxPwNT9dYD6XwxrlzzYjQahwZW7IqKebpqjafBLBRL+EOgSWK9nADQNAVJvp+qpzFzvt48M99C9sPMaFkNqo3kdmM1GEsTncu8AuJ+DuyJeSsndHAWlAftT2GN+aEbCPIPRU7DIpELud8RyyTkHCIWxhgbKo5v5pIVMFWgKw6g935D0KCk6ysNyrG3O8TMThFeudFN9zafsCDciHAUckN9t6642WOs9C8zcDvQczUL15/1tBxK1pBA/peydajkO3VYv9t3bKnX3W4iHDRQO/oOlRGZyxskI4J8sAHak2WiUaq3yRcfC1YaDrPFT3K8pzUXa3NDvzQxjpe17uP dylan@hoff.brad.office.ccanet.co.uk
 
  # IF we want to set any paritular stuff here. e.g hostname, static ips etc.. etc.. just do it directly on the files (not in a chroot)
- 
+
     - name: set the hostname
       copy:
         dest: /mnt/etc/hostname
@@ -329,7 +328,7 @@
       when:
         - inventory_hostname =='hoff'
 
-    - name: set network settings 
+    - name: set network settings
       template:
         src: templates/network.network.j2
         dest: /mnt/etc/systemd/network/20-wired.network
@@ -377,4 +376,3 @@
         msg: "You'll want to verify with efibootmgr -v that the boot order is actually correct. On geosword it might not be""
 #TODO we COULD instigate a reboot here - or make it part of a "super playbook", and let it handle the reboot, and associated wait for it to come backup
 # because you would need to add_host the host based on the ip set above.... hmmm...
-
