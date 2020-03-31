@@ -1,0 +1,53 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: get a list of installed packages
+      shell:
+        cmd: "pacman -Q | awk '{print $1}'"
+      register: packages
+
+    - name: output
+      debug:
+        msg: "packages are {{ packages }}"
+
+    - name: recursive create folder
+      file:
+        path: "./some"
+        state: directory
+      tags:
+        - dircreate
+
+    - name: copy some files
+      synchronize:
+        src: "./files/"
+        dest: ./some/
+      tags:
+        - dircreate
+
+    - name: see what stat output looks like for stat with items
+      stat:
+        path: "some/{{ item }}"
+      register: statcheck
+      with_items:
+        - airline.vim
+      tags:
+        - statcheck
+
+#    - name: debug
+#      debug:
+#        msg: "{{ item.results[0].item }}"
+#      with_items:
+#        - "{{ statcheck }}"
+#      tags:
+#        - statcheck
+
+    - name: Check packages are installed
+      assert:
+        that: "{{ item.stat.exists }}"
+        msg: "File {{ item.invocation.module_args.path }} is not present"
+      with_items:
+        - "{{ statcheck.results }}"
+      tags:
+        - statcheck

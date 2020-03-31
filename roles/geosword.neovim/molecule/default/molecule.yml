@@ -1,0 +1,21 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+  - name: instance
+    image: geosword/archpy:2020033002
+    dockerfile: Dockerfile.j2
+    pull: false
+# pre_build_image: true means PULL from docker hub - which is clearly a typo, its should be "pre_builT_image"
+#    pre_build_image: true
+provisioner:
+  name: ansible
+  log: true
+verifier:
+  name: ansible
+lint: |
+  set -e
+  yamllint .
+  ansible-lint
