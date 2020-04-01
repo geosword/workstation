@@ -1,5 +1,6 @@
 *.swp
 *.swo
+.build_trigger
 files/stage/
 files/inimerger/
 files/stock/

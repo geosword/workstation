@@ -1,5 +1,4 @@
 ---
-
 - name: Verify
   hosts: all
   tasks:
@@ -12,6 +11,7 @@
     shell:
       cmd: "pacman -Q | awk '{print $1}'"
     register: installedpackages
+    changed_when: false
 
   - name: Check packages are installed
     assert:

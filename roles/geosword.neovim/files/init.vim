@@ -29,7 +29,7 @@ inoremap <C-K> <ESC>gti
 
 set pastetoggle=<F2>
 nnoremap <space> :
-
+nnoremap <silent> <C-i> :!touch .build_trigger <enter> <enter>
 " Set the tab and EOL characters
 set listchars=tab:……,trail:~,extends:>,precedes:<
 " Show tabs and EOL characters

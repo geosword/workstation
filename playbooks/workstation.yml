@@ -646,6 +646,33 @@
       become_user: dylanh
       tags:
         - puppet-lint
+
+# Install fswatch
+    - name: clone fswatch
+      git:
+        repo: https://aur.archlinux.org/fswatch.git
+        dest: /usr/src/fswatch
+        update: trufswatch
+      tags:
+        - fswatch
+        - puppet-lint
+
+    - name: make fswatch source code available to me (dylanh user)
+      file:
+        path: /usr/src/fswatch
+        group: wheel
+        mode: '0775'
+      tags:
+        - fswatch
+
+    - name: Build and install fswatch
+      command: chdir=/usr/src/fswatch makepkg -sirc --noconfirm
+      become: true
+      become_user: dylanh
+      tags:
+        - fswatch
+
+
 # some general stuff
 
     - name: remove autologin config
@@ -721,7 +748,10 @@
 # pip install msgpack (for deoplete autocompletion in neovim)
     - name: install msgpack for deoplete - used for autocompletion in vim
       pip:
-        name: msgpack
+        name: "{{ item }}"
+      with_items:
+        - msgpack
+        - pre-commit
 
     - name: message
       debug:

@@ -9,6 +9,7 @@ fi
 # Functions
 fpath=(
 	~/.zsh/functions
+	/home/dylanh/.local/bin/
 	"${fpath[@]}"
 )
 autoload -Uz terraform
@@ -16,7 +17,7 @@ autoload -Uz terraform
 # https://wiki.archlinux.org/index.php/Zsh#Making_Zsh_your_default_shell
 # Path as an array
 typeset -U PATH path
-# path=("$HOME/.local/bin" /other/things/in/path "$path[@]")
+path=("$HOME/.local/bin" "$path[@]")
 export PATH
 export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border'
 # Autocompletions
