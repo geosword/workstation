@@ -1,68 +1,20 @@
 set number
 
-" Only run linters named in ale_linters settings.
-let g:ale_linters_explicit = 1
-" ALEFixers
-let g:ale_fixers = {
-\   '*': ['remove_trailing_lines', 'trim_whitespace'],
-\   'terraform': ['terraform'],
-\}
-let g:ale_fix_on_save = 1
+function! SourceIfExists(file)
+  if filereadable(expand(a:file))
+    exe 'source' a:file
+  endif
+endfunction
 
-" ALELinters - Tried putting these in the ftdetect files like the
-" documentation suggests, but found that I could add up to two, before the
-" third stopped working. so here we are setting them 'globally' per filetype
-let g:ale_linters = {
-\   'yaml': ['yamllint','ansible-lint'],
-\   'python': ['pylint'],
-\   'puppet': ['puppetlint'],
-\   'terraform': ['terraform', 'tflint'],
-\}
+call SourceIfExists("~/.config/nvim/plugins.vim")
 
-" NOTE: If you are ever setting linter arguments, use g: not b:
-
-call plug#begin('~/.config/nvim/plugins')
-Plug 'vim-airline/vim-airline'
-Plug 'vim-airline/vim-airline-themes'
-" deoplete does auto completion
-Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-" we need fugitive for git integration in airline
-Plug 'https://github.com/tpope/vim-fugitive.git'
-Plug 'https://github.com/rodjek/vim-puppet.git'
-" vim surround for adding 'surroundings' e.g. quotes
-Plug 'https://github.com/tpope/vim-surround.git'
-" vim-repeat allows us to use . to repeat surround replacements
-Plug 'https://github.com/tpope/vim-repeat.git'
-" black for uncompromising python code reformating. This particular commit
-" does not suffer from https://github.com/psf/black/issues/1304
-Plug 'psf/black', { 'commit': 'ce14fa8b497bae2b50ec48b3bd7022573a59cdb1' }
-" ale syntax checking framework
-Plug 'dense-analysis/ale'
-Plug 'pearofducks/ansible-vim'
-Plug 'towolf/vim-helm'
-" terraform autocompletion
-Plug 'juliosueiras/vim-terraform-completion'
-Plug 'hashivim/vim-terraform'
-call plug#end()
 set cursorline                          " put a horizontal line on the line where the cursor is
-
-" Apply black on saving
-autocmd BufWritePre *.py execute ':Black'
-" enable deoplete
-let g:deoplete#enable_at_startup = 1
-" This should enable ale linting feedback on the status line
-let g:airline#extensions#ale#enabled = 1
-
-let g:airline_powerline_fonts = 1
-let g:airline#extensions#tabline#enabled = 1
-let g:airline_theme='powerlineish'
-
 
 " tabs
 set autoindent noexpandtab softtabstop=2 tabstop=2 shiftwidth=2
 " we ALWAYS want unix line endings
 set fileformat=unix
-" disable  mode, we have no use for it
+" disable macro mode, we have no use for it
 map q <Nop>
 nnoremap Q <nop>
 
@@ -77,24 +29,14 @@ inoremap <C-K> <ESC>gti
 
 set pastetoggle=<F2>
 nnoremap <space> :
-" disable : so we use space instead
-" autocmd FileType *.yaml,*.yml setlocal tabstop=2 softtabstop=2 shiftwidth=2 expandtab smarttab
-" au! BufNewFile,BufReadPost *.{yaml,yml} set filetype=yaml
-" au! BufNewFile,BufReadPost *.pp set filetype=puppet
-" autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
-
-" and puppet files
+" allows triggering of molecule test with fswatch
+nnoremap <silent> <C-i> :!touch .build_trigger <enter> <enter>
+nnoremap <silent> <C-t> :set expandtab! expandtab? <enter>
 " Set the tab and EOL characters
 set listchars=tab:……,trail:~,extends:>,precedes:<
 " Show tabs and EOL characters
 set list
-
-" Not sure this actually does anything
-let g:deoplete#omni_patterns = {}
-
-call deoplete#custom#option('omni_patterns', {
-\ 'complete_method': 'omnifunc',
-\ 'terraform': '[^ *\t"{=$]\w*',
-\})
-
-call deoplete#initialize()
+" load some things if they exist
+call SourceIfExists("~/.config/nvim/deoplete.vim")
+call SourceIfExists("~/.config/nvim/ale.vim")
+call SourceIfExists("~/.config/nvim/airline.vim")
