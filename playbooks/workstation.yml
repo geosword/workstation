@@ -146,6 +146,7 @@
         - riot-desktop
         - rsync
         - sddm
+        - spectacle
         - subversion
         - sudo
         - syncthing
