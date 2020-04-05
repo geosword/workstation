@@ -40,6 +40,7 @@
         - .config/nvim/ftdetect
         - .virtualenvs
         - .zsh
+        - .zsh/antigen
       tags:
         - createfolders
 
@@ -135,11 +136,11 @@
       with_items:
         - terraform
 
-    - name: Cloning oh-my-zsh
+    - name: Cloning antigen - zsh plugin manager
       git:
-        repo: https://github.com/ohmyzsh/ohmyzsh.git
-        dest: ~/.oh-my-zsh
-      become: yes
+        repo: https://github.com/zsh-users/antigen.git
+        dest: ~/.zsh/antigen
+      become: true
       become_user: dylanh
 
     - name: Cloning auto suggestion
