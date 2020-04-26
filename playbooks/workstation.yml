@@ -128,7 +128,6 @@
         - pavucontrol
         - plasma
         - powerline
-        - powerline-vim
         - powerline-fonts
         - pulseaudio
         - pulseaudio-bluetooth
@@ -158,6 +157,7 @@
         - vim
         - vlc
         - wget
+        - whois
         - wmctrl
         - xclip
         - xdotool

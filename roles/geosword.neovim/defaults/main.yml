@@ -1,3 +1,0 @@
----
-# defaults file for geosword.neovim
-userdir: "{{ ansible_env.HOME }}"
