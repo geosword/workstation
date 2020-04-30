@@ -310,6 +310,23 @@
       tags:
         - bluetooth
 
+    - name: REALLY make sure the bluetooth adapter starts on boot
+      copy:
+        src: files/systemd.unitfiles/bluetooth-poweron.service
+        dest: /etc/systemd/system
+        line: AutoEnable=true
+      tags:
+        - bluetooth
+
+    - name: start and enable bluetooth service
+      systemd:
+        name: bluetooth-poweron
+        daemon_reload: true
+        enabled: true
+        state: started
+      tags:
+        - bluetooth
+
     - name: Make pulseaudio work with bluetooth headsets. bluetooth-policy
       lineinfile:
         path: /etc/pulse/system.pa
