@@ -143,6 +143,8 @@
         - rdesktop
         - rdiff-backup
         - riot-desktop
+# Use rsibreak as a pomodoro timer
+        - rsibreak
         - rsync
         - sddm
         - spectacle
