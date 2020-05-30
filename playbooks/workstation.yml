@@ -173,6 +173,7 @@
         - zathura-pdf-mupdf
         - zsh
         - zsh-theme-powerlevel9k
+# INSTALL THE DRONECI COMMAND LINE TOOL - but this will likely be a role - you need to install it via curl
       ignore_errors: true
       tags: install-packages
 
