@@ -125,6 +125,8 @@
         - nvidia
         - nvidia-settings
         - nvidia-utils
+        # install packer via curl instead, there is likely a role for this
+        - packer
         - pavucontrol
         - plasma
         - powerline
@@ -152,6 +154,7 @@
         - sudo
         - syncthing
         - tcpdump
+        # install terraform via curl instead. There is likely a role for this
         - terraform
         - tmux
         - traceroute
