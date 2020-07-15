@@ -20,7 +20,7 @@ typeset -U PATH path
 path=(
 	"$HOME/.local/bin"
 	"$HOME/.tgenv/bin"
-	"$HOME/.tvenv/bin"
+	"$HOME/.tfenv/bin"
 	/opt/fwbuilder/bin/
 	/home/dylanh/.gem/ruby/2.7.0/bin
 	"$path[@]"
