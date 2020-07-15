@@ -1,7 +1,23 @@
+# vi: ft=bash
+
 # This is a wrapper for terraform. The main idea is to get it to check for and load if appropriate certain environment variables
 # required for running with certain git repos. By Default, it checks for a "credentials" file in TFCREDSLOCATION. The name of the file
 # is the name of the git repo. NOTE IT DOES NOT take the namespace / organisation into account, so you might run into trouble if you ever
 # encounter org1/repo1.git AND org2/repo1.git
+
+# NOTICE ****************************
+# Given you are working on aws mainly, Im going to disable this function for now. Change ENABLED=1 to make it "work"
+
+ENABLED=0
+
+if [[ "$ENABLED" != 1 ]]; then
+	# Just find out which terraform should be run (this is tfenv compatible) and run it with the arguments
+	tfbin=$(bash -c "which --skip-functions terraform")
+	$tfbin "$@"
+	exit $?
+fi
+
+
 
 TFCREDSLOCATION="${HOME}/.terraform"
 # To make a credentials file, create a file in TFCREDSLOCATION (remember to leave OFF .gpg) which sets environment variables. e.g.
