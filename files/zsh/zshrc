@@ -9,23 +9,28 @@ fi
 # Functions
 fpath=(
 	~/.zsh/functions
-	/home/dylanh/.local/bin/
 	"${fpath[@]}"
 )
-autoload -Uz terraform
+# Disabling the terraform wrapper for now because you are working almost entirely in aws
+#autoload -Uz terraform
 
 # https://wiki.archlinux.org/index.php/Zsh#Making_Zsh_your_default_shell
 # Path as an array
 typeset -U PATH path
 path=(
 	"$HOME/.local/bin"
+	"$HOME/.tgenv/bin"
+	"$HOME/.tfenv/bin"
+	/home/dylanh/.local/bin/
 	/opt/fwbuilder/bin/
+	/home/dylanh/.gem/ruby/2.7.0/bin
 	"$path[@]"
 )
 
 export PATH
 export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border'
 export EDITOR=/usr/bin/nvim
+export ANSIBLE_VAULT_PASSWORD_FILE=~/.config/ansibleconf.cfg
 # Autocompletions
 zstyle ':completion:*' menu select
 setopt COMPLETE_ALIASES
