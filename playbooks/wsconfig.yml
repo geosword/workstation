@@ -4,6 +4,16 @@
 # with config files
 
 # TODO WE REALLY WANT THIS TO RUN AS QUICKLY AS POSSIBLE
+#
+#
+# TODO Think about workflow, you are probably going to want to run this when installing new things, so you should have a number of "non core" packages installed
+# here. Probably tagged so that you can run JUST the type of install you want. E.g. pacman based, yay (AUR) based. Or just plain curl from a github address.
+# Keep workstation.yml (or its role equivelent) as installing things that are needed for the workstation to be up and running with a gui. everything else
+# is installed here.
+#  Here is a list of stuff that should be installed here
+#  terragrunt
+#  tgenv - terragrunt virtualenvironment
+#  tfenv - terraform virtualenvironment
 
 # TODO you can / should probably run this AS your user, and escalate when required
 - hosts: all
