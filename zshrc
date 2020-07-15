@@ -1,0 +1,106 @@
+eval $(keychain --eval id_rsa)
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+# Functions
+fpath=(
+	~/.zsh/functions
+	/home/dylanh/.local/bin/
+	"${fpath[@]}"
+)
+autoload -Uz terraform
+
+# https://wiki.archlinux.org/index.php/Zsh#Making_Zsh_your_default_shell
+# Path as an array
+typeset -U PATH path
+path=(
+	"$HOME/.local/bin"
+	"$HOME/.tgenv/bin"
+	"$HOME/.tvenv/bin"
+	/opt/fwbuilder/bin/
+	/home/dylanh/.gem/ruby/2.7.0/bin
+	"$path[@]"
+)
+
+export PATH
+export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border'
+export EDITOR=/usr/bin/nvim
+export ANSIBLE_VAULT_PASSWORD_FILE=~/.config/ansibleconf.cfg
+# Autocompletions
+zstyle ':completion:*' menu select
+setopt COMPLETE_ALIASES
+# autocomplete stuff
+source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
+source /usr/share/fzf/completion.zsh
+
+setopt histignorealldups sharehistory
+# allow not saving to history by preceding command with space - NOTE that you can still press up in the current session and it will be there. Other sessions will not feature the command in the history however
+setopt histignorespace
+setopt interactivecomments
+# Use emacs keybindings even if our EDITOR is set to vi
+bindkey -e
+
+# Keep 1000 lines of history within the shell and save it to ~/.zsh_history:
+HISTSIZE=1000
+SAVEHIST=1000
+HISTFILE=~/.zsh_history
+
+# Use modern completion system
+autoload -Uz compinit
+compinit
+
+zstyle ':completion:*' auto-description 'specify: %d'
+zstyle ':completion:*' completer _expand _complete _correct _approximate
+zstyle ':completion:*' format 'Completing %d'
+zstyle ':completion:*' group-name ''
+eval "$(dircolors -b)"
+zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:*' list-colors ''
+zstyle ':completion:*' list-prompt %SAt %p: Hit TAB for more, or the character to insert%s
+zstyle ':completion:*' matcher-list '' 'm:{a-z}={A-Z}' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=* l:|=*'
+zstyle ':completion:*' menu select=long
+zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p%s
+zstyle ':completion:*' use-compctl false
+zstyle ':completion:*' verbose true
+
+zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
+zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
+
+# Automatically quote globs in URL and remote references
+__remote_commands=(scp rsync)
+autoload -U url-quote-magic
+zle -N self-insert url-quote-magic
+zstyle -e :urlglobber url-other-schema '[[ $__remote_commands[(i)$words[1]] -le ${#__remote_commands}  ]] && reply=("*") || reply=(http https ftp)'
+
+# allow ctrl arrow to navigate words
+# forward-word and backward-word are the same as zsh's ALT-b/f - but does NOT see . as a word boundary
+bindkey "^[[1;5C" forward-word
+bindkey "^[[1;5D" backward-word
+#
+source /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme
+# aliases
+if [ -f ~/.zsh/aliases ]; then
+	source ~/.zsh/aliases
+fi
+# aws autocomplete
+source /usr/bin/aws_zsh_completer.sh
+# virtualenvwrapper config
+# https://stackoverflow.com/questions/6401951/using-different-versions-of-python-with-virtualenvwrapper
+# mkvirtualenv -p python2.7 venvname
+export WORKON_HOME="~/.virtualenvs"
+source /usr/bin/virtualenvwrapper.sh
+# make tmux pretty. IIRC think makes using zsh a bit happier about using powerlevel9k at a console too.
+export TERM=xterm-256color
+
+# Put aws creds into environment variables
+[[ -f ~/.zsh/awsenv.zsh ]] && source ~/.zsh/awsenv.zsh
+
+source ~/.zsh/antigen/antigen.zsh
+antigen bundle vi-mode
+antigen apply
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
