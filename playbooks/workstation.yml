@@ -89,6 +89,8 @@
         - dolphin
 # Clementine is a Music player with plasma media integration. Yes it needs all those plugins to work.
         - Clementine
+# element desktop is the new name for riot desktop
+        - element-desktop
         - gst-plugins-good
         - gst-plugins-base
         - gst-libav
@@ -144,7 +146,6 @@
         - python-virtualenvwrapper
         - rdesktop
         - rdiff-backup
-        - riot-desktop
         - rsync
         - sddm
         - spectacle
