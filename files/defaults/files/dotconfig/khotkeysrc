@@ -1,3 +1,6 @@
+[$Version]
+update_info=spectacle_shortcuts.upd:spectacle-migrate-shortcuts
+
 [Data]
 DataCount=4
 
@@ -885,7 +888,7 @@ Type=GESTURE
 
 [Data_4]
 Comment=Comment
-DataCount=16
+DataCount=18
 Enabled=true
 ImportId[$d]
 Name=Dylans
@@ -1060,7 +1063,7 @@ Uuid={9b6e5340-0398-4ade-832d-f1ff15e5daa4}
 
 [Data_4_16]
 Comment=Comment
-Enabled=true
+Enabled=false
 Name=zathura pdf
 Type=SIMPLE_ACTION_DATA
 
@@ -1083,6 +1086,58 @@ TriggersCount=1
 Key=Alt+Shift+F
 Type=SHORTCUT
 Uuid={847d6b55-d18a-490a-9174-a85fd56ad80f}
+
+[Data_4_17]
+Comment=Comment
+Enabled=true
+Name=Firefox
+Type=SIMPLE_ACTION_DATA
+
+[Data_4_17Actions]
+ActionsCount=1
+
+[Data_4_17Actions0]
+CommandURL=/home/dylanh/.tools/switchto/switchto.py -c Navigator.firefox -e "/usr/bin/firefox"
+Type=COMMAND_URL
+
+[Data_4_17Conditions]
+Comment=
+ConditionsCount=0
+
+[Data_4_17Triggers]
+Comment=Simple_action
+TriggersCount=1
+
+[Data_4_17Triggers0]
+Key=Alt+Shift+F
+Type=SHORTCUT
+Uuid={d19814ce-ac9f-4eb5-b4ee-0ef0dcde9e0e}
+
+[Data_4_18]
+Comment=Comment
+Enabled=true
+Name=slack
+Type=SIMPLE_ACTION_DATA
+
+[Data_4_18Actions]
+ActionsCount=1
+
+[Data_4_18Actions0]
+CommandURL=/home/dylanh/.tools/switchto/switchto.py -c slack.Slack -e "/usr/bin/slack"
+Type=COMMAND_URL
+
+[Data_4_18Conditions]
+Comment=
+ConditionsCount=0
+
+[Data_4_18Triggers]
+Comment=Simple_action
+TriggersCount=1
+
+[Data_4_18Triggers0]
+Key=Alt+Shift+S
+Type=SHORTCUT
+Uuid={961007ca-3c26-4439-a7e6-a224d191e2c0}
 
 [Data_4_1Actions]
 ActionsCount=1
@@ -1201,14 +1256,14 @@ Uuid={1fe13104-bf5c-4bfd-9081-290512384fcb}
 [Data_4_5]
 Comment=Comment
 Enabled=true
-Name=Riot
+Name=Element (Riot)
 Type=SIMPLE_ACTION_DATA
 
 [Data_4_5Actions]
 ActionsCount=1
 
 [Data_4_5Actions0]
-CommandURL=/home/dylanh/.tools/switchto/switchto.py -c riot.riot -e /usr/bin/riot-desktop
+CommandURL=/home/dylanh/.tools/switchto/switchto.py -c "element (riot).Element" -e /usr/bin/element-desktop
 Type=COMMAND_URL
 
 [Data_4_5Conditions]
@@ -1304,7 +1359,7 @@ Uuid={6a89e23d-90ca-4684-91a2-06744c118a43}
 
 [Data_4_9]
 Comment=Comment
-Enabled=true
+Enabled=false
 Name=rdesktop
 Type=SIMPLE_ACTION_DATA
 
@@ -1324,7 +1379,7 @@ Comment=Simple_action
 TriggersCount=1
 
 [Data_4_9Triggers0]
-Key=Alt+Shift+S
+Key=
 Type=SHORTCUT
 Uuid={c0c4920e-3cff-4f5d-b6a6-c1b302feab9e}
 
