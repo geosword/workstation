@@ -3,14 +3,22 @@ ServerAliveInterval 10
 
 ForwardAgent yes
 
+Include aws.conf
+
 # wildcards are acceptable
 Host *.brad.dc.comodoca.net
   user root
 
+host milano
+  Hostname 10.100.38.120
+  user dylanh
+
 Host *.mcr.dc.comodoca.net
+  ProxyJump milano
   user root
 
 Host *.sec.dc.comodoca.net
+  ProxyJump milano
   user root
 
 Host bddcccfw1.brad.dc.comodoca.net
@@ -27,10 +35,6 @@ host geosword
   ServerAliveInterval 60
   ForwardAgent yes
   LocalForward 3389 localhost:3389
-
-host milano
-  Hostname 10.100.38.120
-  user dylanh
 
 host hoff
   Hostname hoff.brad.office.comodoca.net
@@ -49,6 +53,3 @@ host externaleu
 
 host puppet.comodo.net
   ForwardAgent no
-
-
-
