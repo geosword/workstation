@@ -888,7 +888,7 @@ Type=GESTURE
 
 [Data_4]
 Comment=Comment
-DataCount=18
+DataCount=19
 Enabled=true
 ImportId[$d]
 Name=Dylans
@@ -1139,6 +1139,32 @@ Key=Alt+Shift+S
 Type=SHORTCUT
 Uuid={961007ca-3c26-4439-a7e6-a224d191e2c0}
 
+[Data_4_19]
+Comment=Comment
+Enabled=true
+Name=zoom
+Type=SIMPLE_ACTION_DATA
+
+[Data_4_19Actions]
+ActionsCount=1
+
+[Data_4_19Actions0]
+CommandURL=/home/dylanh/.tools/switchto/switchto.py -c zoom.zoom -e "/usr/bin/zoom"
+Type=COMMAND_URL
+
+[Data_4_19Conditions]
+Comment=
+ConditionsCount=0
+
+[Data_4_19Triggers]
+Comment=Simple_action
+TriggersCount=1
+
+[Data_4_19Triggers0]
+Key=Alt+Shift+M
+Type=SHORTCUT
+Uuid={80a660b2-4c6c-4cbe-ad2b-e5ac38babdf3}
+
 [Data_4_1Actions]
 ActionsCount=1
 
@@ -1256,14 +1282,14 @@ Uuid={1fe13104-bf5c-4bfd-9081-290512384fcb}
 [Data_4_5]
 Comment=Comment
 Enabled=true
-Name=Element (Riot)
+Name=Teams
 Type=SIMPLE_ACTION_DATA
 
 [Data_4_5Actions]
 ActionsCount=1
 
 [Data_4_5Actions0]
-CommandURL=/home/dylanh/.tools/switchto/switchto.py -c "element (riot).Element" -e /usr/bin/element-desktop
+CommandURL=/home/dylanh/.tools/switchto/switchto.py -c "microsoft" -e /usr/bin/teams
 Type=COMMAND_URL
 
 [Data_4_5Conditions]
