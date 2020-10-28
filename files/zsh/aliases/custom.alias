@@ -18,3 +18,5 @@ alias mwatch="echo 'running fswatch to run molecule'; fswatch -0 -m poll_monitor
 alias mkansiblerole="source ~/.tools/devtools/mkansiblerole.sh"
 alias xclip="xclip -selection c"
 alias history="history -E"
+alias ll="ls -lhtr"
+alias ls="ls -l"
