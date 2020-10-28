@@ -80,8 +80,10 @@ zstyle -e :urlglobber url-other-schema '[[ $__remote_commands[(i)$words[1]] -le 
 #
 source /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme
 # aliases
-if [ -f ~/.zsh/aliases ]; then
-	source ~/.zsh/aliases
+if [ -d ~/.zsh/aliases ]; then
+	for file in ~/.zsh/aliases/*.alias; do
+		source ${file}
+	done
 fi
 # aws autocomplete
 source /usr/bin/aws_zsh_completer.sh

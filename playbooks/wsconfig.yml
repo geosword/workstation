@@ -118,13 +118,21 @@
       tags:
         - zsh
 
+    - name: create aliases folder
+      file:
+        path: "{{ userdir }}/.zsh/aliases"
+        state: directory
+
     - name: install zsh aliases
       copy:
-        src: files/zsh/zshaliases
-        dest: "{{ userdir }}/.zsh/aliases"
+        src: files/zsh/aliases
+        dest: "{{ userdir }}/.zsh/{{ item }}"
         mode: '0644'
-      become: yes
+      become: true
       become_user: dylanh
+      loop:
+        - custom.alias
+        - git.alias
       tags:
         - zsh
 
