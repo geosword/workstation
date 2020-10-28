@@ -31,6 +31,8 @@ export PATH
 export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border'
 export EDITOR=/usr/bin/nvim
 export ANSIBLE_VAULT_PASSWORD_FILE=~/.config/ansibleconf.cfg
+# WORDCHARS *excludes* / which means it will see '/' as a word boundary
+export WORDCHARS='*?_-.[]~=&;!#$%^(){}<>'
 # Autocompletions
 zstyle ':completion:*' menu select
 setopt COMPLETE_ALIASES
@@ -102,7 +104,6 @@ antigen apply
 
 # vi mode bindkey
 bindkey -a '^[[3~' delete-char
-bindkey -a '^[[2~' vi-insert
 # insert mode bindkeys
 bindkey '^K' delete-char
 # \e[a-z] is alt+[a-z] in viins (non vi) mode
