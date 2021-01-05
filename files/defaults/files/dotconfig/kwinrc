@@ -2,11 +2,12 @@
 update_info=kwin.upd:replace-scalein-with-scale,kwin.upd:port-minimizeanimation-effect-to-js,kwin.upd:port-scale-effect-to-js,kwin.upd:port-dimscreen-effect-to-js,kwin.upd:auto-bordersize
 
 [Compositing]
-OpenGLIsUnsafe=false
+OpenGLIsUnsafe=true
 
 [Desktops]
 Id_1=9c818a85-4fd7-4cc8-8f77-1172f8a752b3
-Number=1
+Id_2=51547410-7fbd-4f6c-b31d-41fa24ea85dd
+Number=2
 Rows=1
 
 [Effect-CoverSwitch]
@@ -17,8 +18,18 @@ TabBoxAlternative=false
 TabBox=false
 TabBoxAlternative=false
 
+[Effect-Wobbly]
+Drag=92
+MoveFactor=20
+Stiffness=3
+WobblynessLevel=3
+
 [Plugins]
+desktopchangeosdEnabled=true
 highlightwindowEnabled=true
+kwin4_effect_loginEnabled=false
+kwin4_effect_logoutEnabled=false
+wobblywindowsEnabled=true
 
 [TabBox]
 ActivitiesMode=1
@@ -43,3 +54,6 @@ MultiScreenMode=0
 ShowDesktopMode=0
 ShowTabBox=true
 SwitchingMode=0
+
+[Windows]
+BorderlessMaximizedWindows=true

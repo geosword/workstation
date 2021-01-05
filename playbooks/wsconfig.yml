@@ -265,6 +265,7 @@
 # Keyboard layout in plasma
         - kcminputrc
         - kxkbrc
+        - kwinrulesrc
 # initially for to make the task switcher "grid" but looks like it could be used to set compositing too
         - kwinrc
 # latte configuration
