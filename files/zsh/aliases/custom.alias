@@ -2,6 +2,7 @@ alias cdppt="cd ~/svn/infra/configs/puppetlabs"
 alias findhost="~/svn/infra/scripts/findhost.pl"
 alias ipcalc="ipcalc -n"
 alias k="kubectl"
+alias mkdir="mkdir -p"
 alias mount="sudo mount"
 alias pacman="sudo pacman"
 alias passook="pwgen"
@@ -16,7 +17,14 @@ alias vim="nvim -p"
 alias nvim="nvim -p"
 alias mwatch="echo 'running fswatch to run molecule'; fswatch -0 -m poll_monitor ./.build_trigger | xargs -0 -I {} /bin/bash -c 'molecule destroy; molecule test --destroy never'"
 alias mkansiblerole="source ~/.tools/devtools/mkansiblerole.sh"
+alias m="molecule"
 alias xclip="xclip -selection c"
 alias history="history -E"
 alias ll="ls -lhtr"
 alias ls="ls -l"
+# NOTE DYLAN use single quotes to avoid interpolations being run at the same time as alias
+# e.g. the below will return the PWD of the dir where you are running the alias, NOT
+# from where alias is being run (typically $HOME)
+alias wo='workon `basename $PWD`'
+alias netcat='netcat -zv'
+alias logout='qdbus org.kde.ksmserver /KSMServer logout 0 0 0'

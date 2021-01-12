@@ -1,0 +1,7 @@
+alias mc='mol converge'
+alias mtdn='mol test --destroy=never'
+alias mpf='mol prepare --force'
+alias mver='mol verify'
+alias mls='mol list'
+alias ml='mol login'
+alias md='mol destroy'
